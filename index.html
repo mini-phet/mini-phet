@@ -1,0 +1,1477 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ระบบข้อมูลมินิธัญญารักษ์ จ.เพชรบูรณ์</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root{
+  --teal:#0F9B8E;--teal-lt:#E0F5F3;--teal-dk:#0C7A6F;
+  --red:#DC2626;--red-lt:#FEF2F2;--amber:#D97706;--amber-lt:#FFFBEB;
+  --green:#16A34A;--green-lt:#F0FDF4;--purple:#7C3AED;--purple-lt:#F5F3FF;
+  --blue:#2563EB;--blue-lt:#EFF6FF;
+  --g50:#F9FAFB;--g100:#F3F4F6;--g200:#E5E7EB;--g400:#9CA3AF;
+  --g500:#6B7280;--g600:#4B5563;--g700:#374151;--g800:#1F2937;--g900:#111827;
+  --font:'IBM Plex Sans Thai',sans-serif;--r:12px;--r-sm:8px;
+  --sh:0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.04);
+  --sh-md:0 4px 12px rgba(0,0,0,.1);--sh-lg:0 20px 40px rgba(0,0,0,.15);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);background:var(--g50);color:var(--g900);min-height:100vh}
+
+/* PIN */
+#pinScreen{position:fixed;inset:0;background:linear-gradient(135deg,#0F9B8E,#095C55);z-index:9999;display:flex;align-items:center;justify-content:center;transition:opacity .4s;pointer-events:all}
+#pinScreen.hidden{opacity:0;pointer-events:none}
+.pin-box{background:#fff;border-radius:20px;padding:36px;width:380px;box-shadow:var(--sh-lg);text-align:center;position:relative;z-index:10000}
+.pin-logo{width:52px;height:52px;background:var(--teal-lt);border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px}
+.pin-logo svg{width:26px;height:26px;stroke:var(--teal);fill:none;stroke-width:2}
+.pin-title{font-size:17px;font-weight:600;margin-bottom:4px}
+.pin-sub{font-size:12px;color:var(--g400);margin-bottom:20px;line-height:1.6}
+.pin-roles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:18px}
+.pin-role{border:1.5px solid var(--g200);border-radius:var(--r-sm);padding:10px 6px;cursor:pointer;transition:all .15s;pointer-events:all;user-select:none}
+.pin-role:hover{border-color:var(--teal)}.pin-role.selected{border-color:var(--teal);background:var(--teal-lt)}
+.pin-role-icon{font-size:18px;margin-bottom:3px}.pin-role-name{font-size:11px;font-weight:600;color:var(--g800)}
+.pin-role-desc{font-size:10px;color:var(--g400);margin-top:2px;line-height:1.3}
+.pin-field{display:none;margin-bottom:0}.pin-field.show{display:block}
+.pin-input{width:100%;font-family:var(--font);font-size:18px;letter-spacing:6px;text-align:center;padding:11px 16px;border:2px solid var(--g200);border-radius:var(--r);outline:none;transition:border-color .15s;margin-bottom:6px}
+.pin-input:focus{border-color:var(--teal)}.pin-input.error{border-color:var(--red);animation:shake .3s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.pin-err{font-size:12px;color:var(--red);height:16px;margin-bottom:8px}
+.pin-btn{width:100%;font-family:var(--font);font-size:14px;font-weight:600;background:var(--teal);color:#fff;border:none;border-radius:var(--r);padding:12px;cursor:pointer;transition:background .15s}
+.pin-btn:hover{background:var(--teal-dk)}
+.pin-skip{font-size:12px;color:var(--g400);margin-top:12px;cursor:pointer;text-decoration:underline}
+
+/* NAV */
+.nav{background:#fff;border-bottom:1px solid var(--g200);display:flex;align-items:center;padding:0 1.5rem;height:58px;position:sticky;top:0;z-index:200}
+.nav-brand{display:flex;align-items:center;gap:10px;margin-right:1.5rem;flex-shrink:0}
+.nav-logo{width:30px;height:30px;background:linear-gradient(135deg,var(--teal),var(--teal-dk));border-radius:7px;display:flex;align-items:center;justify-content:center}
+.nav-logo svg{width:16px;height:16px;fill:#fff}
+.nav-title{font-size:13px;font-weight:600;white-space:nowrap}.nav-sub{font-size:11px;color:var(--g400)}
+.nav-tabs{display:flex;flex:1}
+.nav-tab{padding:0 13px;height:58px;display:flex;align-items:center;gap:5px;font-size:12px;font-weight:500;color:var(--g500);border-bottom:2px solid transparent;cursor:pointer;transition:color .15s,border-color .15s;white-space:nowrap;background:none;border-top:none;border-left:none;border-right:none;font-family:var(--font)}
+.nav-tab:hover{color:var(--g800)}.nav-tab.active{color:var(--teal);border-bottom-color:var(--teal)}
+.nav-tab[disabled]{opacity:.35;cursor:not-allowed;pointer-events:none}.nav-tab svg{width:13px;height:13px}
+.nav-right{display:flex;align-items:center;gap:7px;margin-left:auto}
+.status-pill{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--g600);background:var(--g100);padding:4px 10px;border-radius:99px;border:1px solid var(--g200)}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--g400);transition:background .3s}
+.dot.live{background:var(--green);animation:blink 2s infinite}.dot.error{background:var(--red)}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
+.btn-icon{display:flex;align-items:center;gap:5px;font-size:12px;font-family:var(--font);color:var(--g600);background:#fff;border:1px solid var(--g200);border-radius:var(--r-sm);padding:5px 10px;cursor:pointer;transition:all .15s}
+.btn-icon:hover{background:var(--g100)}.btn-icon svg{width:13px;height:13px;transition:transform .5s}
+.btn-icon.spinning svg{transform:rotate(360deg)}
+.role-badge{display:flex;align-items:center;gap:4px;font-size:11px;padding:4px 9px;border-radius:99px;border:1px solid}
+.role-badge.admin{background:#FEF3C7;color:#92400E;border-color:#FDE68A}
+.role-badge.reg{background:var(--teal-lt);color:var(--teal-dk);border-color:#9FE1CB}
+.role-badge.visitor{background:var(--g100);color:var(--g600);border-color:var(--g200)}
+
+/* PAGES */
+.page{display:none;padding:1.25rem 1.5rem 3rem;max-width:1400px;margin:0 auto}.page.active{display:block}
+
+/* FILTER */
+.filter-bar{display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.filter-label{font-size:12px;color:var(--g400);white-space:nowrap}
+.filter-btn{font-family:var(--font);font-size:11px;font-weight:500;padding:5px 12px;border-radius:99px;border:1px solid var(--g200);background:#fff;color:var(--g600);cursor:pointer;transition:all .15s;white-space:nowrap}
+.filter-btn:hover{border-color:var(--g400)}.filter-btn.active{background:var(--teal);color:#fff;border-color:var(--teal)}
+
+/* SECTIONS */
+.sec-hd{display:flex;align-items:center;gap:10px;margin:24px 0 12px}
+.sec-hd:first-of-type{margin-top:0}
+.sec-num{width:22px;height:22px;background:var(--teal);color:#fff;border-radius:6px;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sec-title{font-size:13px;font-weight:600;color:var(--g800)}.sec-desc{font-size:11px;color:var(--g400);margin-left:auto}
+hr{border:none;border-top:1px solid var(--g100);margin:20px 0 0}
+
+/* STAT */
+.stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:20px}
+.stat-card{background:#fff;border:1px solid var(--g200);border-radius:var(--r);padding:14px 16px;box-shadow:var(--sh)}
+.stat-label{font-size:11px;color:var(--g400);margin-bottom:4px}.stat-val{font-size:22px;font-weight:500}
+
+/* METRIC CARDS */
+.cards-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}
+.card{background:#fff;border:1px solid var(--g200);border-radius:var(--r);padding:16px 18px;box-shadow:var(--sh);transition:box-shadow .2s,transform .15s;cursor:pointer}
+.card:hover{box-shadow:var(--sh-md);transform:translateY(-1px)}
+.card-name{font-size:11px;color:var(--g400);margin-bottom:7px;display:flex;align-items:center;gap:5px;line-height:1.4}
+.hdot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.card-val{font-size:34px;font-weight:300;line-height:1;margin-bottom:3px}.card-unit{font-size:11px;color:var(--g400)}
+.card-hint{font-size:11px;color:var(--teal);margin-top:7px;display:flex;align-items:center;gap:3px}
+.card-hint svg{width:10px;height:10px;stroke:var(--teal);fill:none;stroke-width:2}
+.badge{display:inline-block;font-size:10px;font-weight:500;padding:2px 8px;border-radius:99px;margin-top:7px}
+.bg-green{background:var(--green-lt);color:var(--green)}.bg-amber{background:var(--amber-lt);color:var(--amber)}.bg-red{background:var(--red-lt);color:var(--red)}
+
+/* OCC */
+.occ-list{display:flex;flex-direction:column;gap:9px}
+.occ-row{display:flex;align-items:center;gap:12px}
+.occ-lbl{font-size:12px;color:var(--g600);width:190px;flex-shrink:0;display:flex;align-items:center;gap:7px}
+.occ-track{flex:1;background:var(--g100);border-radius:5px;height:30px;overflow:hidden}
+.occ-fill{height:100%;border-radius:5px;display:flex;align-items:center;padding-left:10px;transition:width 1s cubic-bezier(.4,0,.2,1)}
+.occ-pct{font-size:11px;font-weight:600}.occ-num{font-size:12px;font-weight:600;color:var(--g700);min-width:52px;text-align:right}
+
+/* CHART */
+.chart-card{background:#fff;border:1px solid var(--g200);border-radius:var(--r);padding:18px;box-shadow:var(--sh)}
+.legend{display:flex;flex-wrap:wrap;gap:14px;margin-bottom:14px}
+.leg-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--g600)}
+.leg-sq{width:10px;height:10px;border-radius:2px;flex-shrink:0}.chart-wrap{position:relative;width:100%;height:260px}
+
+/* DROPOUT */
+.dropout-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}
+.dropout-card{background:#fff;border:1px solid var(--g200);border-radius:var(--r);padding:18px;box-shadow:var(--sh);display:flex;flex-direction:column;gap:7px}
+.dropout-name{font-size:11px;color:var(--g400);display:flex;align-items:center;gap:5px}
+.dropout-rate{font-size:38px;font-weight:300;line-height:1}
+.c-green{color:var(--green)}.c-amber{color:var(--amber)}.c-red{color:var(--red)}
+
+/* TABLE */
+.tbl-wrap{background:#fff;border:1px solid var(--g200);border-radius:var(--r);box-shadow:var(--sh);overflow:hidden}
+.tbl-scroll{overflow-x:auto;max-height:560px;overflow-y:auto}
+table{width:100%;border-collapse:collapse;font-size:11px}
+th{background:var(--g50);color:var(--g500);font-weight:500;font-size:10px;text-align:left;padding:9px 10px;border-bottom:1px solid var(--g200);white-space:nowrap;position:sticky;top:0;z-index:1}
+td{padding:8px 10px;border-bottom:1px solid var(--g100);color:var(--g700);vertical-align:middle}
+tr:last-child td{border-bottom:none}tr:hover td{background:var(--g50)}
+.tbl-empty{text-align:center;padding:36px;color:var(--g400);font-size:13px;white-space:normal}
+.blurred{filter:blur(5px);user-select:none;pointer-events:none}
+
+/* TOOLBAR */
+.tbl-toolbar{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--g100);flex-wrap:wrap;gap:8px}
+.toolbar-left{display:flex;align-items:center;gap:8px;flex-wrap:wrap;flex:1}
+.toolbar-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.search-box{display:flex;align-items:center;gap:6px;background:var(--g100);border-radius:var(--r-sm);padding:5px 10px}
+.search-box input{background:none;border:none;outline:none;font-family:var(--font);font-size:12px;color:var(--g800);width:150px}
+.search-box input::placeholder{color:var(--g400)}
+.search-box svg{width:12px;height:12px;flex-shrink:0;stroke:var(--g400);fill:none;stroke-width:2}
+.tbl-sel{font-family:var(--font);font-size:11px;border:1px solid var(--g200);border-radius:var(--r-sm);padding:5px 8px;background:#fff;color:var(--g700);outline:none;cursor:pointer;max-width:180px}
+.tbl-sel:focus{border-color:var(--teal)}
+
+/* INLINE EDIT */
+.inline-sel{font-family:var(--font);font-size:11px;border:1px solid var(--g200);border-radius:5px;padding:3px 6px;background:#fff;color:var(--g900);outline:none;cursor:pointer;width:100%;min-width:220px}
+.inline-sel:focus{border-color:var(--teal)}
+.inline-date{font-family:var(--font);font-size:11px;border:1px solid var(--g200);border-radius:5px;padding:3px 6px;background:#fff;color:var(--g900);outline:none;cursor:pointer;width:130px}
+.date-wrap{position:relative;display:inline-block;width:110px}
+.date-wrap input[type=date]{position:absolute;opacity:0;width:100%;height:100%;top:0;left:0;cursor:pointer;z-index:2}
+.date-wrap .date-display{font-family:var(--font);font-size:11px;border:1px solid var(--g200);border-radius:5px;padding:3px 6px;background:#fff;color:var(--g900);width:100%;display:block;cursor:pointer;min-height:24px;line-height:18px}
+.date-wrap .date-display.empty{color:var(--g400)}
+.date-txt{font-family:var(--font);font-size:11px;border:1px solid var(--g200);border-radius:5px;padding:3px 6px;background:#fff;color:var(--g900);outline:none;width:110px;letter-spacing:.02em}
+.date-txt:focus{border-color:var(--teal)}
+.date-txt::placeholder{color:var(--g400);font-size:10px}
+.inline-date:focus{border-color:var(--teal)}
+.save-btn{font-family:var(--font);font-size:10px;font-weight:600;background:var(--teal);color:#fff;border:none;border-radius:4px;padding:4px 10px;cursor:pointer;white-space:nowrap;transition:background .15s}
+.accept-btn{font-family:var(--font);font-size:10px;font-weight:600;background:var(--teal);color:#fff;border:none;border-radius:4px;padding:5px 12px;cursor:pointer;white-space:nowrap;transition:background .15s}
+.accept-btn:hover{background:var(--teal-dk)}
+.mini-tag{display:inline-block;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:500;border:1.5px solid var(--green);color:var(--green);background:var(--green-lt);white-space:normal;line-height:1.4}
+.date-tag{display:inline-block;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:500;border:1.5px solid var(--green);color:var(--green);background:var(--green-lt);white-space:nowrap}
+.save-btn:hover{background:var(--teal-dk)}.save-btn:disabled{opacity:.5;cursor:not-allowed}
+.edit-btn{font-family:var(--font);font-size:10px;font-weight:600;background:#2563EB;color:#fff;border:none;border-radius:4px;padding:4px 8px;cursor:pointer;white-space:nowrap;transition:background .15s}
+.edit-btn:hover{background:#1D4ED8}
+.del-btn{font-family:var(--font);font-size:10px;font-weight:600;background:var(--red);color:#fff;border:none;border-radius:4px;padding:4px 8px;cursor:pointer;white-space:nowrap;transition:background .15s}
+.del-btn:hover{background:#B91C1C}
+.save-btn:hover{background:var(--teal-dk)}.save-btn:disabled{opacity:.5;cursor:not-allowed}
+.td-edit{min-width:230px;white-space:nowrap}
+.td-date{min-width:135px;white-space:nowrap}
+.td-action{white-space:nowrap}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:#fff;border-radius:var(--r);width:100%;max-width:700px;max-height:90vh;overflow-y:auto;box-shadow:var(--sh-lg);transform:translateY(12px);transition:transform .2s}
+.modal-overlay.open .modal{transform:translateY(0)}
+.modal-hd{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--g100);position:sticky;top:0;background:#fff;z-index:1}
+.modal-hd h2{font-size:15px;font-weight:600}.modal-hd p{font-size:11px;color:var(--g400);margin-top:2px}
+.modal-close{width:30px;height:30px;border-radius:7px;border:1px solid var(--g200);background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;transition:background .15s}
+.modal-close:hover{background:var(--g100)}.modal-body{padding:22px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.form-group{display:flex;flex-direction:column;gap:4px}.form-group.full{grid-column:1/-1}
+label{font-size:11px;font-weight:500;color:var(--g700)}.req{color:var(--red)}
+input[type=text],input[type=date],input[type=tel],select{font-family:var(--font);font-size:12px;border:1px solid var(--g200);border-radius:var(--r-sm);padding:7px 10px;color:var(--g900);background:#fff;outline:none;transition:border-color .15s;width:100%}
+input:focus,select:focus{border-color:var(--teal)}
+.form-section{font-size:10px;font-weight:600;color:var(--g400);text-transform:uppercase;letter-spacing:.06em;grid-column:1/-1;margin-top:6px;padding-bottom:7px;border-bottom:1px solid var(--g100)}
+.modal-ft{display:flex;justify-content:flex-end;gap:8px;padding:14px 22px;border-top:1px solid var(--g100);position:sticky;bottom:0;background:#fff}
+.btn{font-family:var(--font);font-size:12px;font-weight:500;padding:8px 18px;border-radius:var(--r-sm);border:1px solid var(--g200);cursor:pointer;transition:all .15s}
+.btn-ghost{background:#fff;color:var(--g600)}.btn-ghost:hover{background:var(--g100)}
+.btn-primary{background:var(--teal);color:#fff;border-color:var(--teal)}.btn-primary:hover{background:var(--teal-dk)}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed}
+.spin-sm{display:inline-block;width:12px;height:12px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:sp .6s linear infinite;margin-right:5px;vertical-align:middle}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* TOAST */
+.toast{position:fixed;bottom:22px;right:22px;background:var(--g900);color:#fff;font-size:12px;padding:11px 18px;border-radius:var(--r-sm);z-index:9998;transform:translateY(8px);opacity:0;transition:all .25s;pointer-events:none;max-width:320px}
+.toast.show{transform:translateY(0);opacity:1}.toast.success{background:var(--green)}.toast.error{background:var(--red)}
+.last-upd{font-size:11px;color:var(--g400);margin-bottom:1rem;display:flex;align-items:center;gap:5px}
+
+@media(max-width:768px){
+  .nav,.page{padding-left:1rem;padding-right:1rem}
+  .form-grid{grid-template-columns:1fr}.form-group.full{grid-column:1}
+  .occ-lbl{width:110px;font-size:10px}.nav-tab span{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- PIN -->
+<div id="pinScreen">
+  <div class="pin-box">
+    <div class="pin-logo"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+    <div class="pin-title">ระบบข้อมูลมินิธัญญารักษ์</div>
+    <div class="pin-sub">จังหวัดเพชรบูรณ์ · ปีงบ 2569<br>เลือกประเภทการเข้าใช้งาน</div>
+    <div class="pin-roles">
+      <div class="pin-role" onclick="selectRole('visitor',this)"><div class="pin-role-icon">👁️</div><div class="pin-role-name">ผู้เข้าชม</div><div class="pin-role-desc">ดูแดชบอร์ด<br>ไม่ต้องรหัส</div></div>
+      <div class="pin-role" onclick="selectRole('reg',this)"><div class="pin-role-icon">📋</div><div class="pin-role-name">ผู้ลงทะเบียน</div><div class="pin-role-desc">ลงทะเบียน<br>เห็นข้อมูลผู้ป่วย</div></div>
+      <div class="pin-role" onclick="selectRole('admin',this)"><div class="pin-role-icon">🔧</div><div class="pin-role-name">แอดมิน</div><div class="pin-role-desc">จัดการทุกอย่าง<br>สิทธิ์เต็ม</div></div>
+    </div>
+    <div class="pin-field" id="pinFieldWrap">
+      <input class="pin-input" type="password" id="pinInput" placeholder="••••••" maxlength="20" onkeydown="if(event.key==='Enter')checkPin()">
+      <div class="pin-err" id="pinErr"></div>
+    </div>
+    <button class="pin-btn" id="pinBtn" onclick="checkPin()">เลือกประเภทก่อน</button>
+    <div class="pin-skip" onclick="enterAsVisitor()">เข้าชมโดยไม่ใส่รหัสผ่าน →</div>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-brand">
+    <div class="nav-logo"><svg viewBox="0 0 24 24"><path d="M19 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2zm-7 14H8v-2h4v2zm4-4H8v-2h8v2zm0-4H8V7h8v2z"/></svg></div>
+    <div><div class="nav-title">มินิธัญญารักษ์ จ.เพชรบูรณ์</div><div class="nav-sub">ปีงบ 2569</div></div>
+  </div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" id="tab-dashboard" onclick="switchTab('dashboard',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg><span>แดชบอร์ด</span>
+    </button>
+    <button class="nav-tab" id="tab-register" onclick="switchTab('register',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><span>ทะเบียนผู้ป่วย</span>
+    </button>
+    <button class="nav-tab" id="tab-summary" onclick="switchTab('summary',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg><span>สรุปเคส</span>
+    </button>
+  </div>
+  <div class="nav-right">
+    <div class="role-badge visitor" id="roleBadge">👁️ ผู้เข้าชม</div>
+    <div class="status-pill"><div class="dot" id="dot"></div><span id="dotTxt">กำลังโหลด...</span></div>
+    <button class="btn-icon" id="refreshBtn" onclick="refreshAll()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>รีเฟรช
+    </button>
+    <button class="btn-icon" onclick="logout()" style="color:var(--red);border-color:#FECACA">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>ออก
+    </button>
+  </div>
+</nav>
+
+<!-- PAGE: DASHBOARD -->
+<div class="page active" id="page-dashboard">
+  <div class="last-upd" id="lastUpd"></div>
+  <div class="filter-bar">
+    <span class="filter-label">กรองตามโรงพยาบาล:</span>
+    <button class="filter-btn active" onclick="setFilter('all',this)">ทั้งหมด</button>
+    <div id="filterBtns" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+  </div>
+  <div class="sec-hd"><div class="sec-num">★</div><div class="sec-title">ภาพรวมเคสทั้งหมด</div><div class="sec-desc">ข้อมูลจากชีต Summary · เชื่อมกับตัวกรอง</div></div>
+  <div class="stat-row" id="dashStats"></div><hr>
+  <div class="sec-hd"><div class="sec-num">1</div><div class="sec-title">จำนวนเตียงว่าง</div><div class="sec-desc">คลิกเพื่อลงทะเบียนผู้ป่วยใหม่</div></div>
+  <div class="cards-row" id="bedsCards"></div><hr>
+  <div class="sec-hd"><div class="sec-num">2</div><div class="sec-title">อัตราครองเตียง ปีงบ 2569</div><div class="sec-desc">ภาพรวมทั้งปี</div></div>
+  <div class="occ-list" id="occList"></div><hr>
+  <div class="sec-hd"><div class="sec-num">3</div><div class="sec-title">อัตราครองเตียงรายเดือน</div><div class="sec-desc">กราฟเส้นเปรียบเทียบ</div></div>
+  <div class="chart-card"><div class="legend" id="chartLegend"></div><div class="chart-wrap"><canvas id="lineChart"></canvas></div></div><hr>
+  <div class="sec-hd"><div class="sec-num">4</div><div class="sec-title">อัตราการออกกลางคัน</div><div class="sec-desc">Drop-out rate</div></div>
+  <div class="dropout-grid" id="dropoutGrid"></div>
+</div>
+
+<!-- PAGE: REGISTER -->
+<div class="page" id="page-register">
+  <div class="tbl-toolbar" style="border-radius:var(--r) var(--r) 0 0;background:#fff;border:1px solid var(--g200);border-bottom:none">
+    <div class="toolbar-left">
+      <span style="font-size:14px;font-weight:600">ทะเบียนผู้ป่วยรอรับบริการ</span>
+      <div class="search-box"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="regSearch" placeholder="ค้นหา..." oninput="filterRegister()"></div>
+      <select class="tbl-sel" id="regFilterAgency" onchange="filterRegister()"><option value="">หน่วยงานที่นำส่ง (ทั้งหมด)</option></select>
+      <select class="tbl-sel" id="regFilterMini" onchange="filterRegister()">
+        <option value="">มินิธัญญารักษ์ (ทั้งหมด)</option>
+        <option>มินิธัญญารักษ์โรงพยาบาลเขาค้อ</option>
+        <option>มินิธัญญารักษ์โรงพยาบาลวังโป่ง</option>
+        <option>มินิธัญญารักษ์โรงพยาบาลบึงสามพัน</option>
+        <option value="__empty__">ยังไม่ได้รับเคส</option>
+      </select>
+    </div>
+    <div class="toolbar-right">
+      <span id="regCount" style="font-size:11px;color:var(--g400)"></span>
+      <button class="btn btn-primary" id="btnNewReg" onclick="openForm()">
+        <svg style="width:12px;height:12px;display:inline;margin-right:4px;vertical-align:middle;stroke:#fff;fill:none;stroke-width:2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>ลงทะเบียนใหม่
+      </button>
+    </div>
+  </div>
+  <div class="tbl-wrap" style="border-radius:0 0 var(--r) var(--r)">
+    <div class="tbl-scroll">
+      <table><thead><tr>
+        <th>#</th><th>วันที่ลงทะเบียน</th><th>ชื่อ-นามสกุล</th><th>เลขบัตรประชาชน</th>
+        <th>เบอร์โทร</th><th>หน่วยงานที่นำส่ง</th><th>คะแนน V.2</th>
+        <th>อาการร่วมทางจิต</th><th>OAS</th><th>วันที่ประเมิน</th>
+        <th>ใบ ปยส.115</th><th>หลักสูตร</th><th>ผู้ประสานงาน</th><th>เบอร์โทรผู้ประสานงาน</th><th style="min-width:240px">มินิธัญญารักษ์ที่รับเคส</th><th style="min-width:130px">วันที่นัดหมาย</th>
+        <th id="thRegAction" style="display:none;min-width:80px;text-align:center">บันทึก</th>
+        <th id="thRegEditDel" style="display:none;min-width:110px;text-align:center">แก้ไข/ลบ</th>
+      </tr></thead>
+      <tbody id="regBody"><tr><td colspan="17" class="tbl-empty">กำลังโหลด...</td></tr></tbody></table>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE: SUMMARY -->
+<div class="page" id="page-summary">
+  <div class="tbl-toolbar" style="border-radius:var(--r) var(--r) 0 0;background:#fff;border:1px solid var(--g200);border-bottom:none">
+    <div class="toolbar-left">
+      <span style="font-size:14px;font-weight:600">สรุปเคสทั้งหมด</span>
+      <div class="search-box"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="sumSearch" placeholder="ค้นหา..." oninput="filterSummary()"></div>
+      <div style="position:relative;display:inline-block">
+        <button class="tbl-sel" id="statusFilterBtn" onclick="toggleStatusDropdown()" style="cursor:pointer;display:flex;align-items:center;gap:6px;min-width:160px;justify-content:space-between">
+          <span id="statusFilterLabel">สถานะเคส (ทั้งหมด)</span>
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div id="statusDropdown" style="display:none;position:absolute;top:calc(100% + 4px);left:0;background:#fff;border:1px solid var(--g200);border-radius:var(--r-sm);box-shadow:var(--sh-md);z-index:100;min-width:180px;padding:6px 0">
+          <label style="display:flex;align-items:center;gap:8px;padding:6px 12px;cursor:pointer;font-size:12px;font-weight:400;color:var(--g700)" onclick="toggleAllStatus()">
+            <input type="checkbox" id="statusAll" checked onchange="filterSummary()" style="width:14px;height:14px;accent-color:var(--teal)"> ทั้งหมด
+          </label>
+          <div style="border-top:1px solid var(--g100);margin:4px 0"></div>
+          <label style="display:flex;align-items:center;gap:8px;padding:6px 12px;cursor:pointer;font-size:12px;font-weight:400;color:var(--g700)"><input type="checkbox" class="status-cb" value="ระหว่างพิจารณา" onchange="filterSummary()" style="width:14px;height:14px;accent-color:var(--teal)"><span style="display:inline-block;padding:1px 7px;border-radius:99px;background:#F5F3FF;color:#6D28D9;font-size:11px">ระหว่างพิจารณา</span></label>
+          <label style="display:flex;align-items:center;gap:8px;padding:6px 12px;cursor:pointer;font-size:12px;font-weight:400;color:var(--g700)"><input type="checkbox" class="status-cb" value="ยอมรับเคส/แอดมิท" onchange="filterSummary()" style="width:14px;height:14px;accent-color:var(--teal)"><span style="display:inline-block;padding:1px 7px;border-radius:99px;background:#E0F5F3;color:#0F766E;font-size:11px">ยอมรับเคส/แอดมิท</span></label>
+          <label style="display:flex;align-items:center;gap:8px;padding:6px 12px;cursor:pointer;font-size:12px;font-weight:400;color:var(--g700)"><input type="checkbox" class="status-cb" value="จำหน่าย" onchange="filterSummary()" style="width:14px;height:14px;accent-color:var(--teal)"><span style="display:inline-block;padding:1px 7px;border-radius:99px;background:#F0FDF4;color:#15803D;font-size:11px">จำหน่าย</span></label>
+          <label style="display:flex;align-items:center;gap:8px;padding:6px 12px;cursor:pointer;font-size:12px;font-weight:400;color:var(--g700)"><input type="checkbox" class="status-cb" value="ออกกลางคัน" onchange="filterSummary()" style="width:14px;height:14px;accent-color:var(--teal)"><span style="display:inline-block;padding:1px 7px;border-radius:99px;background:#FEF2F2;color:#B91C1C;font-size:11px">ออกกลางคัน</span></label>
+          <label style="display:flex;align-items:center;gap:8px;padding:6px 12px;cursor:pointer;font-size:12px;font-weight:400;color:var(--g700)"><input type="checkbox" class="status-cb" value="ส่งต่อ" onchange="filterSummary()" style="width:14px;height:14px;accent-color:var(--teal)"><span style="display:inline-block;padding:1px 7px;border-radius:99px;background:#EFF6FF;color:#1D4ED8;font-size:11px">ส่งต่อ</span></label>
+          <label style="display:flex;align-items:center;gap:8px;padding:6px 12px;cursor:pointer;font-size:12px;font-weight:400;color:var(--g700)"><input type="checkbox" class="status-cb" value="ยกเลิก" onchange="filterSummary()" style="width:14px;height:14px;accent-color:var(--teal)"><span style="display:inline-block;padding:1px 7px;border-radius:99px;background:#F3F4F6;color:#4B5563;font-size:11px">ยกเลิก</span></label>
+        </div>
+      </div>
+      <select class="tbl-sel" id="sumFilterMini" onchange="filterSummary()">
+        <option value="">มินิธัญญารักษ์ (ทั้งหมด)</option>
+        <option>มินิธัญญารักษ์โรงพยาบาลเขาค้อ</option>
+        <option>มินิธัญญารักษ์โรงพยาบาลวังโป่ง</option>
+        <option>มินิธัญญารักษ์โรงพยาบาลบึงสามพัน</option>
+      </select>
+      <select class="tbl-sel" id="sumFilterAgency" onchange="filterSummary()"><option value="">หน่วยงานที่นำส่ง (ทั้งหมด)</option></select>
+    </div>
+    <div class="toolbar-right"><span id="sumCount" style="font-size:11px;color:var(--g400)"></span></div>
+  </div>
+  <div class="tbl-wrap" style="border-radius:0 0 var(--r) var(--r)">
+    <div class="tbl-scroll">
+      <table><thead><tr>
+        <th>#</th><th>วันที่ลงทะเบียน</th><th>ชื่อ-นามสกุล</th><th>เลขบัตรประชาชน</th>
+        <th>หน่วยงานที่นำส่ง</th><th>มินิธัญญารักษ์</th>
+        <th style="min-width:200px">สถานะเคส</th>
+        <th style="min-width:135px">วันที่เริ่มบำบัด</th>
+        <th style="min-width:135px">วันที่สิ้นสุด</th>
+        <th>จำนวนวันนอน</th><th>ระยะเวลารอ(วัน)</th>
+        <th id="thSumAction" style="display:none">บันทึก</th>
+      </tr></thead>
+      <tbody id="sumBody"><tr><td colspan="12" class="tbl-empty">กำลังโหลด...</td></tr></tbody></table>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL FORM -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeFormOutside(event)">
+  <div class="modal">
+    <div class="modal-hd"><div><h2>ลงทะเบียนผู้ป่วยใหม่</h2><p>บันทึกลงชีต Register</p></div><button class="modal-close" onclick="closeForm()">✕</button></div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-section">ข้อมูลผู้ป่วย</div>
+        <div class="form-group"><label>วันที่ลงทะเบียน <span class="req">*</span></label><input type="date" id="f_reg_date" onchange="updateDateDisplay(this,'f_reg_date_disp')" style="width:100%"></div>
+        <div class="form-group"><label>ชื่อ-นามสกุล <span class="req">*</span></label><input type="text" id="f_name" placeholder="ชื่อ นามสกุล"></div>
+        <div class="form-group"><label>เลขบัตรประชาชน <span class="req">*</span></label><input type="text" id="f_id_card" placeholder="x-xxxx-xxxxx-xx-x" maxlength="17"></div>
+        <div class="form-group"><label>เบอร์โทรศัพท์</label><input type="tel" id="f_phone" placeholder="0xx-xxx-xxxx"></div>
+        <div class="form-group full"><label>หน่วยงานที่นำส่ง</label>
+          <select id="f_agency"><option value="">-- เลือกโรงพยาบาล --</option>
+            <option>รพ.หนองไผ่</option><option>รพ.บึงสามพัน</option><option>รพ.วิเชียรบุรี</option>
+            <option>รพ.หล่มสัก</option><option>รพ.หล่มเก่า</option><option>รพ.เพชรบูรณ์</option>
+            <option>รพ.เขาค้อ</option><option>รพ.วังโป่ง</option><option>รพ.ศรีเทพ</option>
+            <option>รพ.ชนแดน</option><option>รพ.น้ำหนาว</option>
+          </select>
+        </div>
+        <div class="form-section">การประเมิน</div>
+        <div class="form-group"><label>คะแนน V.2</label><input type="text" id="f_v2" placeholder="คะแนน"></div>
+        <div class="form-group"><label>อาการร่วมทางจิต</label><input type="text" id="f_mental" placeholder="ระบุอาการ หรือ ไม่มี"></div>
+        <div class="form-group"><label>OAS</label>
+          <select id="f_oas">
+            <option value="">-- เลือก --</option>
+            <option value="0">0</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+          </select></div>
+        <div class="form-group"><label>วันที่ประเมิน</label><input type="date" id="f_eval_date" onchange="updateDateDisplay(this,'f_eval_date_disp')" style="width:100%"></div>
+        <div class="form-group"><label>ใบ ปยส.115</label>
+          <select id="f_form115"><option value="">-- เลือก --</option><option>มี</option><option>ไม่มี</option><option>รอดำเนินการ</option></select>
+        </div>
+        <div class="form-group"><label>ระยะเวลาหลักสูตรที่ต้องการ</label>
+          <select id="f_duration"><option value="">-- เลือก --</option><option>14 วัน</option><option>30 วัน</option></select>
+        </div>
+        <div class="form-section">ผู้ประสานงาน</div>
+        <div class="form-group"><label>ชื่อ-นามสกุลผู้ประสานงาน</label><input type="text" id="f_coord_name" placeholder="ชื่อ นามสกุล"></div>
+        <div class="form-group"><label>เบอร์โทรผู้ประสานงาน</label><input type="tel" id="f_coord_phone" placeholder="0xx-xxx-xxxx"></div>
+      </div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-ghost" onclick="closeForm()">ยกเลิก</button>
+      <button class="btn btn-primary" id="saveBtn" onclick="saveForm()">บันทึกข้อมูล</button>
+    </div>
+  </div>
+</div>
+<!-- MODAL อัพเดทสถานะ -->
+<div class="modal-overlay" id="updateStatusOverlay" onclick="closeUpdateStatusOutside(event)">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-hd">
+      <div><h2>อัพเดทสถานะ</h2><p id="updateStatusName">-</p></div>
+      <button class="modal-close" onclick="closeUpdateStatus()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid" style="grid-template-columns:1fr">
+        <div class="form-group">
+          <label>สถานะเคส</label>
+          <select id="us_status">
+            <option>ระหว่างพิจารณา</option>
+            <option>ยอมรับเคส/แอดมิท</option>
+            <option>จำหน่าย</option>
+            <option>ออกกลางคัน</option>
+            <option>ส่งต่อ</option>
+            <option>ยกเลิก</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>วันที่เริ่มบำบัด <span style="font-weight:400;color:var(--g400)">(ไม่บังคับ)</span></label>
+          <input type="date" id="us_ds">
+        </div>
+        <div class="form-group">
+          <label>วันที่สิ้นสุด <span style="font-weight:400;color:var(--g400)">(ไม่บังคับ)</span></label>
+          <input type="date" id="us_de">
+        </div>
+      </div>
+    </div>
+    <div class="modal-ft" style="justify-content:space-between">
+      <button class="btn btn-ghost" style="color:var(--red);border-color:var(--red)" onclick="clearUpdateStatus()">ล้างข้อมูล</button>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-ghost" onclick="closeUpdateStatus()">ยกเลิก</button>
+        <button class="btn btn-primary" onclick="saveUpdateStatus()">บันทึก</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL รับงาน -->
+<div class="modal-overlay" id="acceptModalOverlay" onclick="closeAcceptModalOutside(event)">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-hd">
+      <div><h2>รับงาน</h2><p id="acceptModalName">กรอกข้อมูลมินิธัญญารักษ์และวันนัดหมาย</p></div>
+      <button class="modal-close" onclick="closeAcceptModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid" style="grid-template-columns:1fr">
+        <div class="form-group">
+          <label>มินิธัญญารักษ์ที่รับเคส <span class="req">*</span></label>
+          <select id="ac_mini" onchange="validateAccept()">
+            <option value="">-- เลือกมินิธัญญารักษ์ --</option>
+            <option>มินิธัญญารักษ์โรงพยาบาลเขาค้อ</option>
+            <option>มินิธัญญารักษ์โรงพยาบาลวังโป่ง</option>
+            <option>มินิธัญญารักษ์โรงพยาบาลบึงสามพัน</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>วันที่นัดหมาย <span class="req">*</span></label>
+          <input type="date" id="ac_date" onchange="validateAccept()">
+        </div>
+      </div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-ghost" onclick="closeAcceptModal()">ยกเลิก</button>
+      <button class="btn btn-primary" id="acceptSaveBtn" onclick="saveAcceptModal()" disabled>บันทึก</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL แก้ไขข้อมูล -->
+<div class="modal-overlay" id="editModalOverlay" onclick="closeEditFormOutside(event)">
+  <div class="modal">
+    <div class="modal-hd">
+      <div><h2>แก้ไขข้อมูลผู้ป่วย</h2><p>แก้ไขข้อมูลในชีต Register</p></div>
+      <button class="modal-close" onclick="closeEditForm()">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="ef_id_card_orig">
+      <div class="form-grid">
+        <div class="form-section">ข้อมูลผู้ป่วย</div>
+        <div class="form-group"><label>วันที่ลงทะเบียน <span class="req">*</span></label><input type="date" id="ef_reg_date" onchange="updateDateDisplay(this,'ef_reg_date_disp')" style="width:100%"></div>
+        <div class="form-group"><label>ชื่อ-นามสกุล <span class="req">*</span></label><input type="text" id="ef_name"></div>
+        <div class="form-group"><label>เลขบัตรประชาชน <span class="req">*</span></label><input type="text" id="ef_id_card" maxlength="17"></div>
+        <div class="form-group"><label>เบอร์โทรศัพท์</label><input type="tel" id="ef_phone"></div>
+        <div class="form-group full"><label>หน่วยงานที่นำส่ง</label>
+          <select id="ef_agency"><option value="">-- เลือก --</option>
+            <option>รพ.หนองไผ่</option><option>รพ.บึงสามพัน</option><option>รพ.วิเชียรบุรี</option>
+            <option>รพ.หล่มสัก</option><option>รพ.หล่มเก่า</option><option>รพ.เพชรบูรณ์</option>
+            <option>รพ.เขาค้อ</option><option>รพ.วังโป่ง</option><option>รพ.ศรีเทพ</option>
+            <option>รพ.ชนแดน</option><option>รพ.น้ำหนาว</option>
+          </select>
+        </div>
+        <div class="form-section">การประเมิน</div>
+        <div class="form-group"><label>คะแนน V.2</label><input type="text" id="ef_v2"></div>
+        <div class="form-group"><label>อาการร่วมทางจิต</label><input type="text" id="ef_mental"></div>
+        <div class="form-group"><label>OAS</label>
+          <select id="ef_oas"><option value="">-- เลือก --</option>
+            <option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option>
+          </select>
+        </div>
+        <div class="form-group"><label>วันที่ประเมิน</label><input type="date" id="ef_eval_date" onchange="updateDateDisplay(this,'ef_eval_date_disp')" style="width:100%"></div>
+        <div class="form-group"><label>ใบ ปยส.115</label>
+          <select id="ef_form115"><option value="">-- เลือก --</option><option>มี</option><option>ไม่มี</option><option>รอดำเนินการ</option></select>
+        </div>
+        <div class="form-group"><label>ระยะเวลาหลักสูตร</label>
+          <select id="ef_duration"><option value="">-- เลือก --</option><option>14 วัน</option><option>30 วัน</option></select>
+        </div>
+        <div class="form-section">ผู้ประสานงาน</div>
+        <div class="form-group"><label>ชื่อ-นามสกุลผู้ประสานงาน</label><input type="text" id="ef_coord_name"></div>
+        <div class="form-group"><label>เบอร์โทรผู้ประสานงาน</label><input type="tel" id="ef_coord_phone"></div>
+      </div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-ghost" onclick="closeEditForm()">ยกเลิก</button>
+      <button class="btn btn-primary" id="editSaveBtn" onclick="saveEditForm()">บันทึกการแก้ไข</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══ CONFIG ══
+const ROLES_PWD = { 'admin2569':'admin', 'reg2569':'reg' };
+const API = 'https://script.google.com/macros/s/AKfycbxpIQklmgVEsSEflw3yv2h8jLGHzhlEHEno7j9nRyAVx1N7D8HhCcv2VyKs_wDmOHAWUA/exec';
+const SHEET_URL = 'https://docs.google.com/spreadsheets/d/1B1MuyWfCokN7ZTBYhZEJee08h-r5VeYaU7CBhwR5R2g';
+const MINI_OPTIONS = ['มินิธัญญารักษ์โรงพยาบาลเขาค้อ','มินิธัญญารักษ์โรงพยาบาลวังโป่ง','มินิธัญญารักษ์โรงพยาบาลบึงสามพัน'];
+const MINI_BEDS = {
+  'มินิธัญญารักษ์โรงพยาบาลเขาค้อ':    12,
+  'มินิธัญญารักษ์โรงพยาบาลวังโป่ง':    12,
+  'มินิธัญญารักษ์โรงพยาบาลบึงสามพัน': 24,
+};
+const COUNT_STATUS = ['จำหน่าย','ส่งต่อ','ยอมรับเคส/แอดมิท','ยอมรับเดส/แอดมิท','ออกกลางคัน'];
+// ปีงบ 2569: ต.ค.68(10/2025) ถึง ก.ย.69(9/2026)
+const FISCAL_MONTHS = [
+  {label:'ต.ค.68', year:2025, month:10, days:31},
+  {label:'พ.ย.68', year:2025, month:11, days:30},
+  {label:'ธ.ค.68', year:2025, month:12, days:31},
+  {label:'ม.ค.69', year:2026, month:1,  days:31},
+  {label:'ก.พ.69', year:2026, month:2,  days:28},
+  {label:'มี.ค.69', year:2026, month:3,  days:31},
+  {label:'เม.ย.69', year:2026, month:4,  days:30},
+  {label:'พ.ค.69', year:2026, month:5,  days:31},
+  {label:'มิ.ย.69', year:2026, month:6,  days:30},
+  {label:'ก.ค.69', year:2026, month:7,  days:31},
+  {label:'ส.ค.69', year:2026, month:8,  days:31},
+  {label:'ก.ย.69', year:2026, month:9,  days:30},
+];
+const FISCAL_DAYS = 365; // 1 ต.ค.68 - 30 ก.ย.69
+const STATUS_OPTIONS = ['ระหว่างพิจารณา','ยอมรับเคส/แอดมิท','จำหน่าย','ออกกลางคัน','ส่งต่อ','ยกเลิก'];
+const STATUS_COLOR = {
+  'ระหว่างพิจารณา':   {bg:'#F5F3FF',color:'#6D28D9',border:'#DDD6FE'},
+  'ยอมรับเคส/แอดมิท': {bg:'#E0F5F3',color:'#0F766E',border:'#99E6DF'},
+  'ยอมรับเดส/แอดมิท': {bg:'#E0F5F3',color:'#0F766E',border:'#99E6DF'},
+  'จำหน่าย':          {bg:'#F0FDF4',color:'#15803D',border:'#86EFAC'},
+  'ออกกลางคัน':       {bg:'#FEF2F2',color:'#B91C1C',border:'#FECACA'},
+  'ส่งต่อ':           {bg:'#EFF6FF',color:'#1D4ED8',border:'#BFDBFE'},
+  'ยกเลิก':           {bg:'#F3F4F6',color:'#4B5563',border:'#D1D5DB'},
+};
+const COLORS=[{main:'#0F9B8E',light:'#E0F5F3'},{main:'#2563EB',light:'#EFF6FF'},{main:'#7C3AED',light:'#F5F3FF'}];
+const MONTHS=['ต.ค.68','พ.ย.68','ธ.ค.68','ม.ค.69','ก.พ.69','มี.ค.69','เม.ย.69','พ.ค.69','มิ.ย.69','ก.ค.69','ส.ค.69','ก.ย.69'];
+
+let summaryData=[], registerData=[], summarySheetData=[];
+let hospitals=[], activeFilter='all', lineChart=null;
+let currentRole='visitor', selectedRoleOnPin='';
+
+// ── PIN ──
+function selectRole(role,el){
+  selectedRoleOnPin=role;
+  document.querySelectorAll('.pin-role').forEach(r=>r.classList.remove('selected'));
+  el.classList.add('selected');
+  const wrap=document.getElementById('pinFieldWrap'), btn=document.getElementById('pinBtn');
+  if(role==='visitor'){wrap.classList.remove('show');btn.textContent='เข้าสู่ระบบในฐานะผู้เข้าชม';}
+  else{wrap.classList.add('show');document.getElementById('pinInput').focus();btn.textContent='เข้าสู่ระบบ';}
+}
+function checkPin(){
+  if(!selectedRoleOnPin){showToast('กรุณาเลือกประเภทก่อน','error');return;}
+  if(selectedRoleOnPin==='visitor'){enterAsVisitor();return;}
+  const val=document.getElementById('pinInput').value;
+  const inp=document.getElementById('pinInput'), errEl=document.getElementById('pinErr');
+  const got=ROLES_PWD[val];
+  if(got===selectedRoleOnPin){applyRole(got);}
+  else{
+    errEl.textContent=got?'รหัสผ่านไม่ตรงกับประเภทที่เลือก':'รหัสผ่านไม่ถูกต้อง';
+    inp.classList.add('error');
+    setTimeout(()=>{inp.classList.remove('error');errEl.textContent='';},1200);
+    inp.value='';inp.focus();
+  }
+}
+function enterAsVisitor(){applyRole('visitor');}
+function applyRole(role){
+  currentRole=role; sessionStorage.setItem('mini_role',role);
+  document.getElementById('pinScreen').classList.add('hidden');
+  setTimeout(()=>document.getElementById('pinScreen').style.display='none',400);
+  updateUIForRole(); refreshAll();
+}
+function logout(){
+  sessionStorage.removeItem('mini_role'); currentRole='visitor'; selectedRoleOnPin='';
+  document.getElementById('pinInput').value=''; document.getElementById('pinErr').textContent='';
+  document.querySelectorAll('.pin-role').forEach(r=>r.classList.remove('selected'));
+  document.getElementById('pinFieldWrap').classList.remove('show');
+  document.getElementById('pinBtn').textContent='เลือกประเภทก่อน';
+  document.getElementById('pinScreen').style.display='flex';
+  setTimeout(()=>document.getElementById('pinScreen').classList.remove('hidden'),10);
+}
+function updateUIForRole(){
+  const canSee=currentRole==='admin'||currentRole==='reg';
+  const isAdmin=currentRole==='admin';
+  const badge=document.getElementById('roleBadge');
+  if(isAdmin){badge.className='role-badge admin';badge.textContent='🔧 แอดมิน';}
+  else if(currentRole==='reg'){badge.className='role-badge reg';badge.textContent='📋 ผู้ลงทะเบียน';}
+  else{badge.className='role-badge visitor';badge.textContent='👁️ ผู้เข้าชม';}
+  document.getElementById('tab-register').disabled=!canSee;
+  document.getElementById('tab-summary').disabled=!canSee;
+  if(!canSee) switchTab('dashboard',document.getElementById('tab-dashboard'));
+  const b=document.getElementById('btnNewReg'); if(b) b.style.display=canSee?'':'none';
+  // แสดง column บันทึกเฉพาะ admin
+  const thSum=document.getElementById('thSumAction');
+  if(thSum) thSum.style.display=isAdmin?'':'none';
+  // thRegAction แสดงเฉพาะ admin
+  const thReg=document.getElementById('thRegAction');
+  if(thReg) thReg.style.display=isAdmin?'':'none';
+  // แสดงปุ่มแก้ไข/ลบสำหรับ admin และผู้ลงทะเบียน
+  const editDel=document.getElementById('thRegEditDel');
+  if(editDel) editDel.style.display=canSee?'':'none';
+}
+
+// ── INIT ──
+window.addEventListener('load',()=>{
+  document.getElementById('f_reg_date').value=new Date().toISOString().split('T')[0];
+  const saved=sessionStorage.getItem('mini_role');
+  if(saved){
+    currentRole=saved;
+    document.getElementById('pinScreen').style.display='none';
+    updateUIForRole();
+    refreshAll();
+  } else {
+    // โหลดข้อมูลแดชบอร์ดก่อนเสมอ แม้ยังไม่ได้ login
+    refreshAll();
+  }
+});
+
+// ── REFRESH ──
+async function refreshAll(){
+  setDot('loading');
+  const btn=document.getElementById('refreshBtn');
+  btn.classList.add('spinning'); setTimeout(()=>btn.classList.remove('spinning'),600);
+  try{
+    const [s,r]=await Promise.all([
+      fetch(API+'?action=summary').then(r=>r.json()),
+      fetch(API+'?action=register').then(r=>r.json()),
+    ]);
+    summaryData=s.data||[]; registerData=r.data||[];
+    summarySheetData=registerData; // sync
+    buildDashboard();
+    // เรียก filter เฉพาะเมื่อ login แล้ว
+    if(currentRole==='admin'||currentRole==='reg'){
+      filterRegister(); filterSummary();
+    }
+    populateFilters();
+    setDot('live');
+    document.getElementById('lastUpd').innerHTML=
+      `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+       อัปเดตล่าสุด: ${new Date().toLocaleString('th-TH')}`;
+  }catch(e){console.error('refreshAll error:',e);setDot('error');showToast('โหลดข้อมูลไม่สำเร็จ: '+e.message,'error');}
+}
+setInterval(refreshAll,60000);
+
+function populateFilters(){
+  const agencies=[...new Set(registerData.slice(1).map(r=>String(r[5]||'')).filter(Boolean))].sort();
+  const agSel=document.getElementById('regFilterAgency');
+  const cv=agSel.value;
+  agSel.innerHTML='<option value="">หน่วยงานที่นำส่ง (ทั้งหมด)</option>'+agencies.map(a=>`<option>${a}</option>`).join('');
+  if(cv) agSel.value=cv;
+  const sa=[...new Set(registerData.slice(1).map(r=>String(r[5]||'')).filter(Boolean))].sort();
+  const saEl=document.getElementById('sumFilterAgency');
+  const sv=saEl.value;
+  saEl.innerHTML='<option value="">หน่วยงานที่นำส่ง (ทั้งหมด)</option>'+sa.map(a=>`<option>${a}</option>`).join('');
+  if(sv) saEl.value=sv;
+}
+
+// ── DASHBOARD ──
+// ── คำนวณอัตราครองเตียงจากชีต Register ──
+function calcOccupancy(){
+  // Register: r[14]=มินิ(O), r[16]=สถานะ(Q), r[17]=วันเริ่ม(R), r[18]=วันสิ้นสุด(S)
+  const rows = registerData.slice(1).filter(r=>String(r[0]||'').trim());
+
+  // เฉพาะเคสที่นับ
+  const validRows = rows.filter(r=>{
+    const st = String(r[16]||'').trim();
+    // รองรับทั้ง "ยอมรับเคส" และ "ยอมรับเดส" (typo ใน sheet)
+    if(/(ยอมรับ.*แอดมิท|แอดมิท)/.test(st)) return true;
+    return COUNT_STATUS.some(s=>st===s);
+  });
+
+  // สร้าง result per มินิ
+  const result = {};
+  MINI_OPTIONS.forEach(m=>{
+    result[m] = { occYear:0, monthly: Array(12).fill(0) };
+  });
+
+  validRows.forEach(r=>{
+    const mini = String(r[14]||'').trim();
+    const startRaw = r[17]; // col R = วันเริ่มบำบัด
+    const endRaw   = r[18]; // col S = วันสิ้นสุด
+    // ใช้ col T ก่อน ถ้าว่างให้คำนวณจาก S-R
+    let totalDays = Number(r[19]||0);
+    if(totalDays <= 0 && startRaw && endRaw){
+      const ds=new Date(startRaw), de=new Date(endRaw);
+      if(!isNaN(ds)&&!isNaN(de)&&de>=ds)
+        totalDays=Math.round((de-ds)/86400000);
+    }
+    if(!mini || totalDays <= 0) return;
+    const beds = MINI_BEDS[mini];
+    if(!beds) return;
+
+    // สะสมวันนอนรวมสำหรับปีงบ
+    result[mini].occYear += totalDays;
+
+    // รายเดือน: ถ้ามีวันเริ่ม ให้นับวันนอนทั้งหมดในเดือนที่เริ่มบำบัด
+    // ถ้าไม่มีวันเริ่ม ข้ามการคำนวณรายเดือน
+    if(startRaw){
+      const start = new Date(startRaw);
+      if(!isNaN(start)){
+        const sy = start.getFullYear();
+        const sm = start.getMonth()+1;
+        const mIdx = FISCAL_MONTHS.findIndex(fm=>fm.year===sy && fm.month===sm);
+        if(mIdx >= 0){
+          result[mini].monthly[mIdx] += totalDays;
+        }
+      }
+    }
+  });
+
+  // คำนวณจำนวนวันที่ผ่านมาในปีงบจนถึงวันนี้
+  const fiscalStart = new Date(2025, 9, 1); // 1 ต.ค. 2568
+  const today = new Date();
+  const daysSoFar = Math.max(1, Math.round((today - fiscalStart) / 86400000));
+
+  // แปลงเป็น %
+  MINI_OPTIONS.forEach(m=>{
+    const beds = MINI_BEDS[m] || 1;
+    // ปีงบ: หารด้วยวันถึงปัจจุบัน
+    result[m].occYear = parseFloat(((result[m].occYear / (beds * daysSoFar)) * 100).toFixed(2));
+    // รายเดือน: หารด้วยวันในเดือนนั้น
+    result[m].monthly = result[m].monthly.map((d,i)=>
+      parseFloat(((d / (beds * FISCAL_MONTHS[i].days)) * 100).toFixed(2))
+    );
+  });
+  return result;
+}
+
+function buildDashboard(){
+  const rows=registerData.slice(1).filter(r=>{
+    if(!String(r[0]||'').trim()) return false;
+    return String(r[16]||'').trim()!=='';
+  });
+  const total=rows.length;
+  const active=rows.filter(r=>/(ยอมรับ|แอดมิท)/.test(String(r[16]||''))).length;
+  const done=rows.filter(r=>/(จำหน่าย|ออกกลางคัน|ส่งต่อ)/.test(String(r[16]||''))).length;
+  // ข้อ 6: รอรับบริการ = จำนวนผู้ป่วยในหน้าทะเบียน (สถานะว่างหรือระหว่างพิจารณา)
+  const waitingRows=registerData.slice(1).filter(r=>{
+    if(!String(r[0]||'').trim()) return false;
+    const st=String(r[16]||'').trim();
+    if(!(st===''||st==='ระหว่างพิจารณา')) return false;
+    if(activeFilter==='all') return true;
+    const h=hospitals[parseInt(activeFilter)];
+    return h&&String(r[14]||'').includes(h.name);
+  });
+  const waiting=waitingRows.length;
+  renderStatCards(total,active,waiting,done);
+  hospitals=[];
+  for(let r=1;r<summaryData.length;r++){
+    const row=summaryData[r]; if(!String(row[0]||'').trim()) continue;
+    const name=String(row[0]).replace(/มินิธัญญ[า]?รักษ์/g,'').trim();
+    hospitals.push({fullName:String(row[0]).trim(),name,beds:Number(row[1])||0,dropout:Number(row[2])||0,occYear:Number(row[3])||0,monthly:MONTHS.map((m,i)=>({month:m,value:Number(row[4+i])||0})),color:COLORS[hospitals.length%COLORS.length]});
+  }
+  document.getElementById('filterBtns').innerHTML=hospitals.map((h,i)=>`<button class="filter-btn" onclick="setFilter('${i}',this)">${h.name}</button>`).join('');
+  renderDashboard();
+}
+
+function setFilter(val,btn){
+  activeFilter=val;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active'); renderDashboard();
+}
+
+function renderDashboard(){
+  // อัปเดต stat cards ตาม filter
+  const rows=registerData.slice(1).filter(r=>{
+    if(!String(r[0]||'').trim()) return false;
+    return String(r[16]||'').trim()!=='';
+  });
+  const visRows=activeFilter==='all'?rows:rows.filter(r=>hospitals[parseInt(activeFilter)]&&String(r[14]||'').includes(hospitals[parseInt(activeFilter)].name));
+  const total=visRows.length;
+  const active=visRows.filter(r=>/(ยอมรับ|แอดมิท)/.test(String(r[16]||''))).length;
+  const done=visRows.filter(r=>/(จำหน่าย|ออกกลางคัน|ส่งต่อ)/.test(String(r[16]||''))).length;
+  const waitingRows=registerData.slice(1).filter(r=>{
+    if(!String(r[0]||'').trim()) return false;
+    const st=String(r[16]||'').trim();
+    if(!(st===''||st==='ระหว่างพิจารณา')) return false;
+    if(activeFilter==='all') return true;
+    const h=hospitals[parseInt(activeFilter)];
+    return h&&String(r[14]||'').includes(h.name);
+  });
+  const waiting=waitingRows.length;
+  const statsEl=document.getElementById('dashStats');
+  renderStatCards(total,active,waiting,done);
+  const canReg=currentRole==='admin'||currentRole==='reg';
+  const vis=activeFilter==='all'?hospitals:[hospitals[parseInt(activeFilter)]].filter(Boolean);
+  document.getElementById('bedsCards').innerHTML=vis.map(h=>{
+    const isNeg=h.beds<0,isZero=h.beds===0;
+    const bc=isNeg?'bg-red':isZero?'bg-amber':'bg-green';
+    const bt=isNeg?'เกินจำนวนเตียง':isZero?'เต็มพอดี':'มีเตียงว่าง';
+    const clickFn=canReg?`switchTab('register',document.getElementById('tab-register'));setTimeout(openForm,150)`:`''`;
+    return `<div class="card" onclick="${clickFn}" style="${canReg?'':'cursor:default'}">
+      <div class="card-name"><span class="hdot" style="background:${h.color.main}"></span>${h.name}</div>
+      <div class="card-val" style="color:${isNeg?'var(--red)':h.color.main}">${h.beds>0?'+':''}${h.beds}</div>
+      <div class="card-unit">เตียง</div><span class="badge ${bc}">${bt}</span>
+      <div class="card-hint"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>${canReg?'คลิกลงทะเบียนผู้ป่วยใหม่':'คลิกดูชีต Register'}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('occList').innerHTML=vis.map(h=>{
+    const pct=Math.min(h.occYear,100);
+    return `<div class="occ-row"><div class="occ-lbl"><span class="hdot" style="background:${h.color.main}"></span>${h.name}</div><div class="occ-track"><div class="occ-fill" style="width:${pct}%;background:${h.color.light}"><span class="occ-pct" style="color:${h.color.main}">${h.occYear.toFixed(2)}%</span></div></div><div class="occ-num">${h.occYear.toFixed(2)}%</div></div>`;
+  }).join('');
+  document.getElementById('chartLegend').innerHTML=vis.map(h=>`<span class="leg-item"><span class="leg-sq" style="background:${h.color.main}"></span>${h.name}</span>`).join('');
+  if(lineChart) lineChart.destroy();
+  lineChart=new Chart(document.getElementById('lineChart'),{
+    type:'line',
+    data:{labels:MONTHS,datasets:vis.map(h=>({label:h.name,data:h.monthly.map(m=>m.value),borderColor:h.color.main,backgroundColor:h.color.light,tension:.35,pointRadius:4,pointHoverRadius:7,pointBackgroundColor:h.color.main,borderWidth:2.5,fill:false}))},
+    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.dataset.label}: ${c.parsed.y.toFixed(2)}%`}}},scales:{x:{ticks:{font:{size:10},color:'#9CA3AF',autoSkip:false,maxRotation:45},grid:{color:'#F3F4F6'}},y:{min:0,max:110,ticks:{font:{size:10},color:'#9CA3AF',callback:v=>v+'%'},grid:{color:'#F3F4F6'}}}}
+  });
+  document.getElementById('dropoutGrid').innerHTML=vis.map(h=>{
+    const rc=h.dropout===0?'c-green':h.dropout<=2?'c-amber':'c-red';
+    const bc=h.dropout===0?'bg-green':h.dropout<=2?'bg-amber':'bg-red';
+    const bt=h.dropout===0?'ดีมาก':h.dropout<=2?'ปานกลาง':'ควรติดตาม';
+    return `<div class="dropout-card"><div class="dropout-name"><span class="hdot" style="background:${h.color.main}"></span>${h.name}</div><div class="dropout-rate ${rc}">${h.dropout.toFixed(2)}%</div><span class="badge ${bc}">${bt}</span></div>`;
+  }).join('');
+}
+
+// ── REGISTER TABLE ──
+function buildStatusMap(){
+  const map={};
+  registerData.slice(1).forEach(r=>{
+    const id=String(r[3]||'').replace(/-/g,'').trim();
+    if(id) map[id]=String(r[16]||'').trim(); // col Q = สถานะ
+  });
+  return map;
+}
+
+function filterRegister(){
+  const canSee=currentRole==='admin'||currentRole==='reg';
+  const isAdmin=currentRole==='admin';
+  const q=(document.getElementById('regSearch').value||'').toLowerCase();
+  const fAg=document.getElementById('regFilterAgency').value;
+  const fMn=document.getElementById('regFilterMini').value;
+  let rows=registerData.slice(1).filter(r=>String(r[0]||'').trim());
+  // แสดงเฉพาะ: สถานะว่าง หรือ ระหว่างพิจารณา (col Q)
+  rows=rows.filter(r=>{
+    const st=String(r[16]||'').trim();
+    return st===''||st==='ระหว่างพิจารณา';
+  });
+  if(q) rows=rows.filter(r=>r.some(c=>String(c).toLowerCase().includes(q)));
+  if(fAg) rows=rows.filter(r=>String(r[5]||'')===fAg);
+  if(fMn){
+    if(fMn==='__empty__') rows=rows.filter(r=>!String(r[14]||'').trim());
+    else rows=rows.filter(r=>String(r[14]||'')===fMn);
+  }
+  document.getElementById('regCount').textContent=`${rows.length} รายการ`;
+  const tbody=document.getElementById('regBody');
+  if(!rows.length){tbody.innerHTML='<tr><td colspan="17" class="tbl-empty">ไม่พบข้อมูล</td></tr>';return;}
+
+  // col index: 0=ลำดับ,1=วันที่,2=ชื่อ,3=บัตร,4=โทร,5=หน่วยงาน,6=v2,7=จิต,8=oas
+  // 9=วันประเมิน,10=ปยส,11=หลักสูตร,12=ผู้ประสาน,13=โทรประสาน
+  // col N(index13)=วันนัด, col O(index14)=มินิ
+  tbody.innerHTML=rows.map(r=>{
+    const rowNum=String(r[0]||'');
+    const idCard=String(r[3]||'').replace(/-/g,'').trim();
+    const rowNumSum=String(r[0]||'').trim(); // col A = ลำดับ
+    const miniVal=r[14]||'';  // col O (getRange 15) = มินิ
+    const apptVal=r[15]||'';  // col P (getRange 16) = วันนัด
+    const miniDisplay = miniVal
+      ? `<span class="mini-tag">${miniVal}</span>`
+      : `<span style="color:var(--g400);font-size:11px">ยังไม่ได้รับเคส</span>`;
+    const dateDisplay = apptVal
+      ? `<span class="date-tag">${fmtDate(apptVal)}</span>`
+      : `<span style="color:var(--g400);font-size:11px">-</span>`;
+    const editPart=`<td style="min-width:180px;white-space:normal">${miniDisplay}</td>
+         <td style="min-width:110px">${dateDisplay}</td>
+         <td style="text-align:center">
+           ${isAdmin?`<button class="accept-btn" onclick="openAcceptModal('${rowNum}','${r[2]||''}')">รับงาน</button>`:''}
+         </td>
+         <td style="display:${canSee?'':'none'};text-align:center;white-space:nowrap">
+           <button class="edit-btn" onclick="openEditForm('${rowNum}')">✏️</button>
+           <button class="del-btn" style="margin-left:4px" onclick="cancelReg('${rowNum}',this)">🗑️</button>
+         </td>`;
+    return `<tr>
+      <td>${rowNum}</td><td style="white-space:nowrap">${fmtDate(r[1])}</td>
+      <td style="font-weight:500;min-width:130px" class="${canSee?'':'blurred'}">${r[2]||''}</td>
+      <td style="font-family:monospace;min-width:120px;white-space:nowrap" class="${canSee?'':'blurred'}">${r[3]||''}</td>
+      <td style="white-space:nowrap">${fmtPhone(r[4])}</td><td style="white-space:nowrap">${r[5]||''}</td>
+      <td style="text-align:center">${r[6]||''}</td><td style="min-width:100px">${r[7]||''}</td>
+      <td style="text-align:center">${r[8]===0||r[8]==="0"?'0':(r[8]||"")}</td><td style="white-space:nowrap">${fmtDate(r[9])}</td>
+      <td>${r[10]||''}</td><td>${r[11]||''}</td>
+      <td style="min-width:120px;white-space:nowrap">${r[12]||''}</td>
+      <td style="white-space:nowrap">${r[13]||''}</td>
+      ${editPart}
+    </tr>`;
+  }).join('');
+}
+
+// ── SUMMARY TABLE ──
+function filterSummary(){
+  const canSee=currentRole==='admin'||currentRole==='reg';
+  const isAdmin=currentRole==='admin';
+  const q=(document.getElementById('sumSearch').value||'').toLowerCase();
+  const checkedStatuses=[...document.querySelectorAll('.status-cb:checked')].map(cb=>cb.value);
+  const allChecked=document.getElementById('statusAll')?.checked;
+  const fMn=document.getElementById('sumFilterMini').value;
+  const fAg=document.getElementById('sumFilterAgency').value;
+  let rows=registerData.slice(1).filter(r=>{
+    if(!String(r[0]||'').trim()) return false;
+    return String(r[16]||'').trim()!=='';
+  });
+  if(q) rows=rows.filter(r=>r.some(c=>String(c).toLowerCase().includes(q)));
+  if(!allChecked && checkedStatuses.length>0) rows=rows.filter(r=>checkedStatuses.some(s=>String(r[16]||'').includes(s)));
+  if(fMn) rows=rows.filter(r=>String(r[14]||'')===fMn);
+  if(fAg) rows=rows.filter(r=>String(r[5]||'')===fAg);
+  updateStatusLabel();
+  document.getElementById('sumCount').textContent=`${rows.length} รายการ`;
+  const tbody=document.getElementById('sumBody');
+  if(!rows.length){tbody.innerHTML='<tr><td colspan="12" class="tbl-empty">ไม่พบข้อมูล</td></tr>';return;}
+  const sc=s=>{
+    s=String(s||'').trim();
+    const c=STATUS_COLOR[s];
+    if(c) return `background:${c.bg};color:${c.color};border:1px solid ${c.border}`;
+    return 'background:var(--g100);color:var(--g600)';
+  };
+  tbody.innerHTML=rows.map(r=>{
+    const idCard=String(r[3]||'').replace(/-/g,'').trim();
+    const rowNumSum=String(r[0]||'').trim();
+    const miniVal=String(r[14]||'');
+    const statusVal=String(r[16]||'');
+    const startVal=r[17]||'';
+    const endVal=r[18]||'';
+    const editPart=`<td><span class="badge" style="${sc(statusVal)}">${statusVal||'-'}</span></td>
+        <td style="white-space:nowrap">${fmtDate(startVal)}</td>
+        <td style="white-space:nowrap">${fmtDate(endVal)}</td>
+        <td style="text-align:center">${r[19]||''}</td>
+        <td style="text-align:center">${fmtWait(r[20])}</td>
+        <td style="display:${isAdmin?'':'none'};text-align:center">
+          <button class="accept-btn" onclick="openUpdateStatus('${rowNumSum}','${r[2]||''}','${statusVal}','${toInputDate(startVal)}','${toInputDate(endVal)}')">อัพเดทสถานะ</button>
+        </td>`;
+    return `<tr>
+      <td>${r[0]||''}</td><td style="white-space:nowrap">${fmtDate(r[1])}</td>
+      <td style="font-weight:500;min-width:130px" class="${canSee?'':'blurred'}">${r[2]||''}</td>
+      <td style="font-family:monospace;min-width:120px;white-space:nowrap" class="${canSee?'':'blurred'}">${r[3]||''}</td>
+      <td style="white-space:nowrap">${r[5]||''}</td>
+      <td style="white-space:normal;min-width:180px">${miniVal}</td>
+      ${editPart}
+    </tr>`;
+  }).join('');
+}
+
+async function saveRegRow(rowNum,currentMini,btn){
+  btn.disabled=true; btn.textContent='กำลังบันทึก...';
+  const appt=document.getElementById('rappt_'+rowNum)?.value||'';
+  const mini=document.getElementById('rmini_'+rowNum)?.value||currentMini||'';
+  if(!mini&&!appt){showToast('กรุณาเลือกมินิหรือวันนัดหมายก่อน','error');btn.disabled=false;btn.textContent='บันทึก';return;}
+
+  // Optimistic update
+  const rIdx=registerData.findIndex((r,i)=>i>0&&Number(r[0])===Number(rowNum));
+  const bk={m:null,a:null,s:null};
+  if(rIdx>=0){
+    bk.m=registerData[rIdx][14];bk.a=registerData[rIdx][15];bk.s=registerData[rIdx][16];
+    registerData[rIdx][14]=mini;registerData[rIdx][15]=appt;registerData[rIdx][16]='ระหว่างพิจารณา';
+    filterRegister();
+  }
+
+  const params=new URLSearchParams({action:'update_register',row_num:rowNum,appt_date:appt,mini_name:mini});
+  try{
+    await fetch(API,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:params.toString()});
+    showToast('✓ บันทึกสำเร็จ','success');
+  }catch(e){
+    if(rIdx>=0){registerData[rIdx][14]=bk.m;registerData[rIdx][15]=bk.a;registerData[rIdx][16]=bk.s;filterRegister();}
+    showToast('บันทึกไม่สำเร็จ: '+e.message,'error');
+  }
+  btn.disabled=false; btn.textContent='บันทึก';
+}
+
+async function saveSumRow(rowNum,miniName,btn){
+  btn.disabled=true; btn.textContent='กำลังบันทึก...';
+  const status=document.getElementById('sst_'+rowNum)?.value||'';
+  const ds=document.getElementById('sds_'+rowNum)?.value||'';
+  const de=document.getElementById('sde_'+rowNum)?.value||'';
+
+  // Optimistic update: อัปเดต UI ทันที
+  const rIdx=registerData.findIndex((r,i)=>i>0&&Number(r[0])===Number(rowNum));
+  const bk={s:null,ds:null,de:null};
+  if(rIdx>=0){
+    bk.s=registerData[rIdx][16]; bk.ds=registerData[rIdx][17]; bk.de=registerData[rIdx][18];
+    if(status) registerData[rIdx][16]=status;
+    if(ds)     registerData[rIdx][17]=ds;
+    if(de)     registerData[rIdx][18]=de;
+    filterSummary(); renderStatCards_fromData();
+  }
+
+  // อัปเดต UI ทันที ไม่รอ fetch
+  showToast('✓ บันทึกสำเร็จ','success');
+  btn.disabled=false; btn.textContent='บันทึก';
+  // fire-and-forget ใน background
+  writeAPI({action:'update_case',row_num:rowNum,status,date_start:ds,date_end:de});
+}
+
+// ── FORM ──
+function openForm(){
+  if(currentRole!=='admin'&&currentRole!=='reg'){showToast('คุณไม่มีสิทธิ์ลงทะเบียนผู้ป่วย','error');return;}
+  document.getElementById('modalOverlay').classList.add('open');
+}
+function closeForm(){document.getElementById('modalOverlay').classList.remove('open');}
+function closeFormOutside(e){if(e.target===document.getElementById('modalOverlay'))closeForm();}
+
+async function saveForm(){
+  const name=document.getElementById('f_name').value.trim();
+  const reg_date=document.getElementById('f_reg_date').value;
+  const id_card=document.getElementById('f_id_card').value.trim();
+  if(!name||!reg_date||!id_card){showToast('กรุณากรอกข้อมูลที่จำเป็น (*)','error');return;}
+  const btn=document.getElementById('saveBtn');
+  btn.disabled=true; btn.innerHTML='<span class="spin-sm"></span>กำลังบันทึก...';
+  const params=new URLSearchParams({
+    action:'add_register',reg_date,name,id_card,
+    phone:document.getElementById('f_phone').value,
+    agency:document.getElementById('f_agency').value,
+    v2_score:document.getElementById('f_v2').value,
+    mental:document.getElementById('f_mental').value,
+    oas:document.getElementById('f_oas').value,
+    eval_date:document.getElementById('f_eval_date').value,
+    form115:document.getElementById('f_form115').value,
+    duration:document.getElementById('f_duration').value,
+    coord_name:document.getElementById('f_coord_name').value,
+    coord_phone:document.getElementById('f_coord_phone').value,
+  });
+  try{
+    await fetch(API,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:params.toString()});
+    {showToast('✓ บันทึกสำเร็จ','success');closeForm();clearForm();setTimeout(refreshAll,500);}
+  }catch(e){showToast('บันทึกไม่สำเร็จ: '+e.message,'error');}
+  btn.disabled=false; btn.innerHTML='บันทึกข้อมูล';
+}
+function clearForm(){
+  ['f_name','f_id_card','f_phone','f_v2','f_mental','f_coord_name','f_coord_phone'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['f_agency','f_form115','f_duration','f_oas'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  const rd=document.getElementById('f_reg_date');
+  if(rd){
+    rd.value=new Date().toISOString().split('T')[0];
+    updateDateDisplay(rd,'f_reg_date_disp');
+  }
+  const ed=document.getElementById('f_eval_date');if(ed)ed.value='';
+}
+
+// ── EDIT FORM ──
+function openEditForm(rowNum){
+  const row=registerData.slice(1).find(r=>String(r[0]||'')===String(rowNum));
+  if(!row){showToast('ไม่พบข้อมูลผู้ป่วย','error');return;}
+  document.getElementById('ef_id_card_orig').value=rowNum;
+  const efReg=document.getElementById('ef_reg_date');
+  if(efReg){efReg.value=toInputDate(row[1]);updateDateDisplay(efReg,'ef_reg_date_disp');}
+  document.getElementById('ef_name').value=row[2]||'';
+  document.getElementById('ef_id_card').value=row[3]||'';
+  document.getElementById('ef_phone').value=row[4]||'';
+  document.getElementById('ef_agency').value=row[5]||'';
+  document.getElementById('ef_v2').value=row[6]||'';
+  document.getElementById('ef_mental').value=row[7]||'';
+  document.getElementById('ef_oas').value=String(row[8]||'');
+  const efEval=document.getElementById('ef_eval_date');
+  if(efEval){efEval.value=toInputDate(row[9]);updateDateDisplay(efEval,'ef_eval_date_disp');}
+  document.getElementById('ef_form115').value=row[10]||'';
+  document.getElementById('ef_duration').value=row[11]||'';
+  document.getElementById('ef_coord_name').value=row[12]||'';
+  document.getElementById('ef_coord_phone').value=row[13]||'';
+  document.getElementById('editModalOverlay').classList.add('open');
+}
+function closeEditForm(){document.getElementById('editModalOverlay').classList.remove('open');}
+function closeEditFormOutside(e){if(e.target===document.getElementById('editModalOverlay'))closeEditForm();}
+
+async function saveEditForm(){
+  const origId=document.getElementById('ef_id_card_orig').value;
+  const name=document.getElementById('ef_name').value.trim();
+  const id_card=document.getElementById('ef_id_card').value.trim();
+  const reg_date=document.getElementById('ef_reg_date').value;
+  if(!name||!id_card||!reg_date){showToast('กรุณากรอกข้อมูลที่จำเป็น (*)','error');return;}
+  const btn=document.getElementById('editSaveBtn');
+  btn.disabled=true; btn.innerHTML='<span class="spin-sm"></span>กำลังบันทึก...';
+  // อัปเดต UI ทันที
+  const rIdx=registerData.findIndex((r,i)=>i>0&&Number(r[0])===Number(origId));
+  if(rIdx>=0){
+    registerData[rIdx][1]=reg_date; registerData[rIdx][2]=name; registerData[rIdx][3]=id_card;
+    registerData[rIdx][4]=document.getElementById('ef_phone').value;
+    registerData[rIdx][5]=document.getElementById('ef_agency').value;
+    registerData[rIdx][6]=document.getElementById('ef_v2').value;
+    registerData[rIdx][7]=document.getElementById('ef_mental').value;
+    registerData[rIdx][8]=document.getElementById('ef_oas').value;
+    registerData[rIdx][9]=document.getElementById('ef_eval_date').value;
+    registerData[rIdx][10]=document.getElementById('ef_form115').value;
+    registerData[rIdx][11]=document.getElementById('ef_duration').value;
+    registerData[rIdx][12]=document.getElementById('ef_coord_name').value;
+    registerData[rIdx][13]=document.getElementById('ef_coord_phone').value;
+  }
+  closeEditForm(); filterRegister();
+  showToast('✓ แก้ไขข้อมูลสำเร็จ','success');
+  btn.disabled=false; btn.innerHTML='บันทึกการแก้ไข';
+  const params=new URLSearchParams({
+    action:'edit_register',row_num:origId,reg_date,name,id_card,
+    phone:document.getElementById('ef_phone').value||registerData[rIdx]?.[4]||'',
+    agency:document.getElementById('ef_agency').value||'',
+    v2_score:document.getElementById('ef_v2').value||'',
+    mental:document.getElementById('ef_mental').value||'',
+    oas:document.getElementById('ef_oas').value||'',
+    eval_date:document.getElementById('ef_eval_date').value||'',
+    form115:document.getElementById('ef_form115').value||'',
+    duration:document.getElementById('ef_duration').value||'',
+    coord_name:document.getElementById('ef_coord_name').value||'',
+    coord_phone:document.getElementById('ef_coord_phone').value||'',
+  });
+  try{
+    const res=await fetch(API, {method:'POST',mode:'no-cors',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:params.toString()});
+    if(!json.success) showToast('⚠️ บันทึกในระบบล้มเหลว: '+(json.error||'?'),'error');
+  }catch(e){showToast('⚠️ บันทึกในระบบล้มเหลว','error');}
+}
+
+async function cancelReg(rowNum,btn){
+  if(!confirm('ยืนยันการยกเลิกการลงทะเบียนผู้ป่วยรายนี้?')) return;
+  btn.disabled=true;
+  const params=new URLSearchParams({action:'cancel_register',row_num:rowNum});
+  try{
+    await fetch(API,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:params.toString()});
+    {
+      showToast('✓ ยกเลิกการลงทะเบียนแล้ว','success');
+      // อัปเดต registerData ทันที
+      const rIdx=registerData.findIndex((r,i)=>i>0&&Number(r[0])===Number(rowNum));
+      if(rIdx>=0) registerData[rIdx][16]='ยกเลิก';
+      filterRegister();
+    }
+  }catch(e){showToast('ไม่สำเร็จ: '+e.message,'error');}
+  btn.disabled=false;
+}
+
+function renderStatCards(total,active,waiting,done){
+  const canReg=currentRole==='admin'||currentRole==='reg';
+  const el=document.getElementById('dashStats');
+  if(!el) return;
+  const waitStyle='color:var(--amber)'+(canReg?';cursor:pointer':'');
+  const waitOnclick=canReg?' onclick="goToRegister()" title="คลิกดูรายละเอียด"':'';
+  const waitArrow=canReg?' <span style="font-size:12px">↗</span>':'';
+  el.innerHTML=
+    '<div class="stat-card"><div class="stat-label">เคสทั้งหมด</div><div class="stat-val">'+total+'</div></div>'+
+    '<div class="stat-card"><div class="stat-label">กำลังรับบริการ</div><div class="stat-val" style="color:var(--teal)">'+active+'</div></div>'+
+    '<div class="stat-card"><div class="stat-label">รอรับบริการ</div><div class="stat-val" style="'+waitStyle+'"'+waitOnclick+'>'+waiting+waitArrow+'</div></div>'+
+    '<div class="stat-card"><div class="stat-label">สิ้นสุดการบำบัด</div><div class="stat-val" style="color:var(--green)">'+done+'</div></div>';
+}
+function renderStatCards_fromData(){
+  // คำนวณ stats จาก registerData ที่อัปเดตแล้ว โดยไม่ต้อง fetch ใหม่
+  const canReg=currentRole==='admin'||currentRole==='reg';
+  const rows=registerData.slice(1).filter(r=>{
+    if(!String(r[0]||'').trim()) return false;
+    return String(r[16]||'').trim()!=='';
+  });
+  const visRows=activeFilter==='all'?rows:rows.filter(r=>hospitals[parseInt(activeFilter)]&&String(r[14]||'').includes(hospitals[parseInt(activeFilter)].name));
+  const total=visRows.length;
+  const active=visRows.filter(r=>/(ยอมรับ|แอดมิท)/.test(String(r[16]||''))).length;
+  const done=visRows.filter(r=>/(จำหน่าย|ออกกลางคัน|ส่งต่อ)/.test(String(r[16]||''))).length;
+  const statusMap=buildStatusMap();
+  const waitingRows=registerData.slice(1).filter(r=>{
+    if(!String(r[0]||'').trim()) return false;
+    const st=String(r[16]||'').trim();
+    if(!(st===''||st==='ระหว่างพิจารณา')) return false;
+    if(activeFilter==='all') return true;
+    const h=hospitals[parseInt(activeFilter)];
+    return h&&String(r[14]||'').includes(h.name);
+  });
+  renderStatCards(total,active,waitingRows.length,done);
+}
+function toggleStatusDropdown(){
+  const dd=document.getElementById('statusDropdown');
+  if(!dd) return;
+  const isOpen=dd.style.display!=='none';
+  dd.style.display=isOpen?'none':'block';
+  if(!isOpen) setTimeout(()=>document.addEventListener('click',closeStatusDropdown,{once:true}),10);
+}
+function closeStatusDropdown(e){
+  const dd=document.getElementById('statusDropdown');
+  const btn=document.getElementById('statusFilterBtn');
+  if(dd&&!dd.contains(e.target)&&btn&&!btn.contains(e.target)) dd.style.display='none';
+}
+function toggleAllStatus(){
+  const allCb=document.getElementById('statusAll');
+  document.querySelectorAll('.status-cb').forEach(cb=>cb.checked=allCb.checked);
+  updateStatusLabel(); filterSummary();
+}
+function updateStatusLabel(){
+  const checked=[...document.querySelectorAll('.status-cb:checked')].map(cb=>cb.value);
+  const allCb=document.getElementById('statusAll');
+  const lbl=document.getElementById('statusFilterLabel');
+  if(!lbl) return;
+  if(allCb?.checked||checked.length===0){ lbl.textContent='สถานะเคส (ทั้งหมด)'; }
+  else if(checked.length===1){ lbl.textContent=checked[0]; }
+  else{ lbl.textContent=`สถานะเคส (${checked.length} รายการ)`; }
+}
+// ── ACCEPT MODAL ──
+let acceptRowNum = null;
+function openAcceptModal(rowNum, name){
+  acceptRowNum = String(rowNum).trim();
+  document.getElementById('acceptModalName').textContent = 'ผู้ป่วย: ' + name;
+  // โหลดค่าเดิมถ้ามี
+  const row = registerData.find(r=>String(r[0]||'')===String(rowNum));
+  document.getElementById('ac_mini').value = row ? (row[14]||'') : '';
+  document.getElementById('ac_date').value = row ? toInputDate(row[15]||'') : '';
+  document.getElementById('acceptSaveBtn').disabled = !(document.getElementById('ac_mini').value && document.getElementById('ac_date').value);
+  document.getElementById('acceptModalOverlay').classList.add('open');
+}
+function closeAcceptModal(){
+  document.getElementById('acceptModalOverlay').classList.remove('open');
+  acceptRowNum = null;
+}
+function closeAcceptModalOutside(e){
+  if(e.target===document.getElementById('acceptModalOverlay')) closeAcceptModal();
+}
+function validateAccept(){
+  const mini = document.getElementById('ac_mini').value;
+  const date = document.getElementById('ac_date').value;
+  document.getElementById('acceptSaveBtn').disabled = !(mini && date);
+}
+async function saveAcceptModal(){
+  const mini = document.getElementById('ac_mini').value;
+  const date = document.getElementById('ac_date').value;
+  if(!mini || !date){ showToast('กรุณากรอกข้อมูลให้ครบ','error'); return; }
+  const btn = document.getElementById('acceptSaveBtn');
+  btn.disabled = true; btn.innerHTML = '<span class="spin-sm"></span>บันทึก...';
+  // อัปเดต UI ทันที
+  // ค้นหาจาก index 1 เพื่อ skip header row
+  const rIdx = registerData.findIndex((r,i)=>i>0&&Number(r[0])===Number(acceptRowNum));
+  const backup = {mini:null, date:null, status:null};
+  if(rIdx >= 0){
+    backup.mini = registerData[rIdx][14];
+    backup.date = registerData[rIdx][15];
+    backup.status = registerData[rIdx][16];
+    registerData[rIdx][14] = mini;
+    registerData[rIdx][15] = date;
+    registerData[rIdx][16] = 'ระหว่างพิจารณา';
+  }
+  const savedRowNum = acceptRowNum; // save ก่อน close
+  closeAcceptModal();
+  filterRegister();
+  showToast('✓ รับงานสำเร็จ','success');
+  btn.disabled = false; btn.innerHTML = 'บันทึก';
+  writeAPI({action:'update_register',row_num:savedRowNum,mini_name:mini,appt_date:date});
+}
+// ── CORS-safe API call ใช้ script tag แทน fetch ──
+function callAPI(params, onSuccess){
+  const url = API + '?' + new URLSearchParams(params).toString();
+  const s = document.createElement('script');
+  s.src = url + '&callback=_cb_' + Date.now();
+  document.head.appendChild(s);
+  setTimeout(()=>{ document.head.removeChild(s); if(onSuccess) onSuccess(); }, 1500);
+}
+
+// fetch แบบ no-cors สำหรับ write (ไม่รอ response)
+async function writeAPI(params){
+  try{
+    await fetch(API, {
+      method:'POST',
+      mode:'no-cors',
+      headers:{'Content-Type':'application/x-www-form-urlencoded'},
+      body: new URLSearchParams(params).toString()
+    });
+  }catch(e){}
+}
+
+// ── UPDATE STATUS MODAL ──
+let updateStatusRowNum = null;
+function openUpdateStatus(rowNum, name, status, ds, de){
+  updateStatusRowNum = rowNum;
+  document.getElementById('updateStatusName').textContent = 'ผู้ป่วย: ' + name;
+  document.getElementById('us_status').value = status || 'ระหว่างพิจารณา';
+  document.getElementById('us_ds').value = ds || '';
+  document.getElementById('us_de').value = de || '';
+  document.getElementById('updateStatusOverlay').classList.add('open');
+}
+function closeUpdateStatus(){
+  document.getElementById('updateStatusOverlay').classList.remove('open');
+  updateStatusRowNum = null;
+}
+function closeUpdateStatusOutside(e){
+  if(e.target===document.getElementById('updateStatusOverlay')) closeUpdateStatus();
+}
+function clearUpdateStatus(){
+  document.getElementById('us_status').value = 'ระหว่างพิจารณา';
+  document.getElementById('us_ds').value = '';
+  document.getElementById('us_de').value = '';
+}
+function saveUpdateStatus(){
+  const rowNum = updateStatusRowNum;
+  const status = document.getElementById('us_status').value;
+  const ds = document.getElementById('us_ds').value;
+  const de = document.getElementById('us_de').value;
+  // อัปเดต registerData ทันที
+  const rIdx = registerData.findIndex((r,i)=>i>0&&Number(r[0])===Number(rowNum));
+  if(rIdx>=0){
+    if(status) registerData[rIdx][16] = status;
+    if(ds)     registerData[rIdx][17] = ds;
+    if(de)     registerData[rIdx][18] = de;
+    // ถ้าล้างข้อมูล (status=ระหว่างพิจารณา และ ds/de ว่าง)
+    if(!ds) registerData[rIdx][17] = '';
+    if(!de) registerData[rIdx][18] = '';
+  }
+  closeUpdateStatus();
+  filterSummary();
+  renderStatCards_fromData();
+  showToast('✓ อัพเดทสถานะสำเร็จ','success');
+  // fire-and-forget
+  writeAPI({action:'update_case',row_num:rowNum,status,date_start:ds,date_end:de});
+}
+function goToRegister(){
+  const tab=document.getElementById('tab-register');
+  if(tab && !tab.disabled) switchTab('register',tab);
+}
+function switchTab(tab,el){
+  document.querySelectorAll('.nav-tab').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('page-'+tab).classList.add('active');
+  if(tab==='register') filterRegister();
+  if(tab==='summary') filterSummary();
+}
+function setDot(s){
+  const d=document.getElementById('dot'),t=document.getElementById('dotTxt');
+  d.className='dot'+(s==='live'?' live':s==='error'?' error':'');
+  t.textContent=s==='live'?'เชื่อมต่อแล้ว':s==='error'?'เกิดข้อผิดพลาด':'กำลังโหลด...';
+}
+function showToast(msg,type=''){
+  const t=document.getElementById('toast'); t.textContent=msg; t.className='toast '+(type||'');
+  t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3500);
+}
+function fmtPhone(v){
+  if(v===''||v===null||v===undefined) return '';
+  let s=String(v).trim();
+  // ตัดทศนิยมออกถ้ามี เช่น 812345678.0
+  s=s.replace(/\.0+$/,'');
+  // ถ้าเป็นตัวเลขล้วนและขึ้นต้นด้วย 6,7,8,9 → เติมศูนย์
+  if(/^[6-9]\d{7,8}$/.test(s)) s='0'+s;
+  // ถ้าขึ้นต้นด้วย 66 (country code) → แทนด้วย 0
+  if(/^66\d{8,9}$/.test(s)) s='0'+s.slice(2);
+  return s;
+}
+function fmtWait(v){
+  if(v===''||v===null||v===undefined) return '';
+  const s=String(v).trim();
+  if(s==='') return '';
+  const n=Number(s);
+  if(isNaN(n)) return s;
+  if(n===0) return '0';
+  if(n>90) return 'N/A';
+  return String(n);
+}
+// แปลงวันที่เป็น dd/mm/พ.ศ. สำหรับแสดงใน text input
+function fmtDateTxt(v){
+  if(!v) return '';
+  try{
+    const s=String(v).trim();
+    // ถ้าเป็น ISO หรือ timestamp
+    if(s.includes('T')||/^\d{4}-\d{2}-\d{2}/.test(s)){
+      const d=new Date(v);
+      if(!isNaN(d.getTime())){
+        const day=d.getDate().toString().padStart(2,'0');
+        const mon=(d.getMonth()+1).toString().padStart(2,'0');
+        const yr=d.getFullYear()+543;
+        return day+'/'+mon+'/'+yr;
+      }
+    }
+    // ถ้าเป็น dd/mm/yyyy แล้ว
+    if(/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(s)) return s;
+  }catch(e){}
+  return String(v);
+}
+
+// แปลง dd/mm/พ.ศ. → ISO yyyy-mm-dd (ค.ศ.) สำหรับส่ง Apps Script
+function parseDateTxt(v){
+  if(!v) return '';
+  const s=String(v).trim();
+  const m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if(!m) return s; // ส่งตามเดิมถ้า parse ไม่ได้
+  let y=parseInt(m[3]);
+  if(y>2400) y=y-543; // พ.ศ.→ค.ศ.
+  return `${y}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;
+}
+
+function fmtDate(v){
+  if(!v) return '';
+  try{
+    const s=String(v).trim();
+    // ISO หรือ timestamp → แปลงเป็น dd/mm/yyyy
+    if(s.includes('T')||/^\d{4}-\d{2}-\d{2}/.test(s)){
+      const d=new Date(s);
+      if(!isNaN(d.getTime())){
+        const day=d.getDate().toString().padStart(2,'0');
+        const mon=(d.getMonth()+1).toString().padStart(2,'0');
+        const yr=d.getFullYear();
+        return day+'/'+mon+'/'+yr;
+      }
+    }
+    // dd-mm-yyyy หรือ dd/mm/yyyy อยู่แล้ว → แปลงเป็น dd/mm/yyyy
+    const m=s.match(/^(\d{1,2})[\-\/](\d{1,2})[\-\/](\d{4})$/);
+    if(m) return m[1].padStart(2,'0')+'/'+m[2].padStart(2,'0')+'/'+m[3];
+  }catch(e){}
+  return String(v);
+}
+function toInputDate(v){
+  if(!v) return '';
+  try{
+    const s=String(v).trim();
+    // ISO หรือ timestamp → yyyy-mm-dd
+    if(/^\d{4}-\d{2}-\d{2}/.test(s)||s.includes('T')){
+      const d=new Date(s);
+      if(!isNaN(d.getTime())) return d.toISOString().split('T')[0];
+    }
+    // dd/mm/yyyy หรือ dd-mm-yyyy → yyyy-mm-dd
+    const m=s.match(/^(\d{1,2})[\-\/](\d{1,2})[\-\/](\d{4})$/);
+    if(m) return `${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;
+  }catch(e){}
+  return '';
+}
+// แปลง yyyy-mm-dd (จาก input[type=date]) → dd/mm/yyyy สำหรับส่งไป Sheets
+function parseInputDate(v){
+  if(!v) return '';
+  const s=String(v).trim();
+  // yyyy-mm-dd → dd/mm/yyyy
+  const m=s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if(m) return `${m[3]}/${m[2]}/${m[1]}`;
+  // dd/mm/yyyy อยู่แล้ว
+  if(/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(s)) return s;
+  return s;
+}
+// auto-format วันที่เมื่อพิมพ์: เพิ่ม / อัตโนมัติ
+function updateDateDisplay(input, dispId){
+  const disp = document.getElementById(dispId);
+  if(!disp) return;
+  if(input.value){
+    disp.textContent = fmtDate(input.value);
+    disp.classList.remove('empty');
+  } else {
+    disp.textContent = 'dd/mm/yyyy';
+    disp.classList.add('empty');
+  }
+}
+function autoFmtDate(el){
+  let v=el.value.replace(/[^0-9]/g,'');
+  if(v.length>2) v=v.slice(0,2)+'/'+v.slice(2);
+  if(v.length>5) v=v.slice(0,5)+'/'+v.slice(5);
+  if(v.length>10) v=v.slice(0,10);
+  el.value=v;
+}
+</script>
+</body>
+</html>
