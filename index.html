@@ -348,13 +348,18 @@ input:focus,select:focus{border-color:var(--teal)}
   <div class="tbl-wrap" style="border-radius:0 0 var(--r) var(--r)">
     <div class="tbl-scroll">
       <table><thead><tr>
-        <th>#</th><th>วันที่ลงทะเบียน</th><th>ชื่อ-นามสกุล</th><th>เลขบัตรประชาชน</th>
-        <th>หน่วยงานที่นำส่ง</th><th>มินิธัญญารักษ์</th>
-        <th style="min-width:140px">สถานะเคส</th>
-        <th style="min-width:110px">วันที่เริ่มบำบัด</th>
-        <th style="min-width:110px">วันที่สิ้นสุด</th>
-        <th>จำนวนวันนอน (วัน)</th><th>ระยะเวลารอ (วัน)</th>
-        <th id="thSumAction" style="display:none;min-width:110px">อัพเดทสถานะ</th>
+        <th style="width:30px">#</th>
+        <th style="width:90px">วันที่ลงทะเบียน</th>
+        <th style="min-width:120px">ชื่อ-นามสกุล</th>
+        <th style="min-width:120px">เลขบัตรประชาชน</th>
+        <th style="min-width:90px">หน่วยงานที่นำส่ง</th>
+        <th style="min-width:160px">มินิธัญญารักษ์</th>
+        <th style="width:110px">สถานะเคส</th>
+        <th style="width:90px">วันที่เริ่มบำบัด</th>
+        <th style="width:90px">วันที่สิ้นสุด</th>
+        <th>จำนวนวันนอน (วัน)</th>
+        <th>ระยะเวลารอ (วัน)</th>
+        <th id="thSumAction" style="display:none;width:110px;text-align:center">อัพเดทสถานะ</th>
       </tr></thead>
       <tbody id="sumBody"><tr><td colspan="12" class="tbl-empty">กำลังโหลด...</td></tr></tbody></table>
     </div>
@@ -960,8 +965,8 @@ function filterSummary(){
     const editPart=`<td><span class="badge" style="${sc(statusVal)}">${statusVal||'-'}</span></td>
         <td style="white-space:nowrap">${fmtDate(startVal)}</td>
         <td style="white-space:nowrap">${fmtDate(endVal)}</td>
-        <td style="text-align:center">${r[19]||''}</td>
-        <td style="text-align:center">${fmtWait(r[20])}</td>
+        <td style="text-align:center;white-space:nowrap">${r[19]||''}</td>
+        <td style="text-align:center;white-space:nowrap">${fmtWait(r[20])}</td>
         <td style="display:${isAdmin?'':'none'};text-align:center">
           <button class="accept-btn" onclick="openUpdateStatus('${rowNumSum}','${r[2]||''}','${statusVal}','${toInputDate(startVal)}','${toInputDate(endVal)}')">อัพเดทสถานะ</button>
         </td>`;
