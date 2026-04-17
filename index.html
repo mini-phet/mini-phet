@@ -350,11 +350,11 @@ input:focus,select:focus{border-color:var(--teal)}
       <table><thead><tr>
         <th>#</th><th>วันที่ลงทะเบียน</th><th>ชื่อ-นามสกุล</th><th>เลขบัตรประชาชน</th>
         <th>หน่วยงานที่นำส่ง</th><th>มินิธัญญารักษ์</th>
-        <th style="min-width:200px">สถานะเคส</th>
-        <th style="min-width:135px">วันที่เริ่มบำบัด</th>
-        <th style="min-width:135px">วันที่สิ้นสุด</th>
-        <th>จำนวนวันนอน</th><th>ระยะเวลารอ(วัน)</th>
-        <th id="thSumAction" style="display:none">บันทึก</th>
+        <th style="min-width:140px">สถานะเคส</th>
+        <th style="min-width:110px">วันที่เริ่มบำบัด</th>
+        <th style="min-width:110px">วันที่สิ้นสุด</th>
+        <th>จำนวนวันนอน (วัน)</th><th>ระยะเวลารอ (วัน)</th>
+        <th id="thSumAction" style="display:none;min-width:110px">อัพเดทสถานะ</th>
       </tr></thead>
       <tbody id="sumBody"><tr><td colspan="12" class="tbl-empty">กำลังโหลด...</td></tr></tbody></table>
     </div>
@@ -535,7 +535,7 @@ input:focus,select:focus{border-color:var(--teal)}
 <script>
 // ══ CONFIG ══
 const ROLES_PWD = { 'admin2569':'admin', 'reg2569':'reg' };
-const API = 'https://script.google.com/macros/s/AKfycbxpIQklmgVEsSEflw3yv2h8jLGHzhlEHEno7j9nRyAVx1N7D8HhCcv2VyKs_wDmOHAWUA/exec';
+const API = 'https://script.google.com/macros/s/AKfycbwUNph_FvHwFZfUQBWaai6DkkxbwBx8GR4u47tn1IOF51Q0d1-w_P62-ldRpdqaGFzoXA/exec';
 const SHEET_URL = 'https://docs.google.com/spreadsheets/d/1B1MuyWfCokN7ZTBYhZEJee08h-r5VeYaU7CBhwR5R2g';
 const MINI_OPTIONS = ['มินิธัญญารักษ์โรงพยาบาลเขาค้อ','มินิธัญญารักษ์โรงพยาบาลวังโป่ง','มินิธัญญารักษ์โรงพยาบาลบึงสามพัน'];
 const MINI_BEDS = {
@@ -966,10 +966,11 @@ function filterSummary(){
           <button class="accept-btn" onclick="openUpdateStatus('${rowNumSum}','${r[2]||''}','${statusVal}','${toInputDate(startVal)}','${toInputDate(endVal)}')">อัพเดทสถานะ</button>
         </td>`;
     return `<tr>
-      <td>${r[0]||''}</td><td style="white-space:nowrap">${fmtDate(r[1])}</td>
-      <td style="font-weight:500;min-width:130px" class="${canSee?'':'blurred'}">${r[2]||''}</td>
-      <td style="font-family:monospace;min-width:120px;white-space:nowrap" class="${canSee?'':'blurred'}">${r[3]||''}</td>
-      <td style="white-space:nowrap">${r[5]||''}</td>
+      <td style="text-align:center">${r[0]||''}</td>
+      <td style="white-space:nowrap;font-size:11px">${fmtDate(r[1])}</td>
+      <td style="min-width:100px;font-size:11px" class="${canSee?'':'blurred'}">${r[2]||''}</td>
+      <td style="font-family:monospace;min-width:100px;white-space:nowrap;font-size:10px" class="${canSee?'':'blurred'}">${r[3]||''}</td>
+      <td style="white-space:nowrap;font-size:11px">${r[5]||''}</td>
       <td style="white-space:normal;min-width:180px">${miniVal}</td>
       ${editPart}
     </tr>`;
